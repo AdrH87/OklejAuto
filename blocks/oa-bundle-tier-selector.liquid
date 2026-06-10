@@ -498,6 +498,20 @@
   .oa-tier-panel__clip {
     overflow: hidden;
     min-height: 0;
+    /* visibility keeps the collapsed panel out of the a11y tree and tab
+       order (overflow:hidden alone leaves chips focusable at 0 height) */
+    visibility: hidden;
+    transition: visibility 0.3s;
+  }
+
+  .oa-tier-panel[data-open='true'] .oa-tier-panel__clip {
+    visibility: visible;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .oa-tier-panel__clip {
+      transition: none;
+    }
   }
 
   .oa-tier-panel__card {

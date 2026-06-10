@@ -112,9 +112,9 @@
                 "icon_2": "eye",
                 "label_2": "Niewidoczna",
                 "icon_3": "stopwatch",
-                "label_3": "Montaż DIY",
+                "label_3": "MontaÅ¼ DIY",
                 "icon_4": "check_box",
-                "label_4": "Gwarancja trwałości",
+                "label_4": "Gwarancja trwaÅ‚oÅ›ci",
                 "icon_5": "ruler",
                 "label_5": "Docinana pod Twoje auto",
                 "padding-block-start": 4,
@@ -126,9 +126,9 @@
             },
             "text_vehicle_heading": {
               "type": "text",
-              "name": "Nagłówek — pojazd",
+              "name": "NagÅ‚Ã³wek â€” pojazd",
               "settings": {
-                "text": "<h3>Do jakiego auta przygotować wycinkę?</h3>",
+                "text": "<h3>Do jakiego auta przygotowaÄ‡ wycinkÄ™?</h3>",
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "left",
@@ -152,7 +152,7 @@
             },
             "group_vehicle_row_1": {
               "type": "group",
-              "name": "Pojazd — rząd 1",
+              "name": "Pojazd â€” rzÄ…d 1",
               "settings": {
                 "content_direction": "row",
                 "vertical_on_mobile": false,
@@ -183,7 +183,7 @@
               "blocks": {
                 "vehicle_marka": {
                   "type": "product-custom-property",
-                  "name": "Pojazd — marka",
+                  "name": "Pojazd â€” marka",
                   "settings": {
                     "property_heading": "Marka",
                     "property_description": "",
@@ -202,7 +202,7 @@
                 },
                 "vehicle_model": {
                   "type": "product-custom-property",
-                  "name": "Pojazd — model",
+                  "name": "Pojazd â€” model",
                   "settings": {
                     "property_heading": "Model",
                     "property_description": "",
@@ -224,7 +224,7 @@
             },
             "group_vehicle_row_2": {
               "type": "group",
-              "name": "Pojazd — rząd 2",
+              "name": "Pojazd â€” rzÄ…d 2",
               "settings": {
                 "content_direction": "row",
                 "vertical_on_mobile": false,
@@ -255,7 +255,7 @@
               "blocks": {
                 "vehicle_rocznik": {
                   "type": "product-custom-property",
-                  "name": "Pojazd — rocznik",
+                  "name": "Pojazd â€” rocznik",
                   "settings": {
                     "property_heading": "Rocznik",
                     "property_description": "",
@@ -274,7 +274,7 @@
                 },
                 "vehicle_wersja": {
                   "type": "product-custom-property",
-                  "name": "Pojazd — wersja",
+                  "name": "Pojazd â€” wersja",
                   "settings": {
                     "property_heading": "Wersja / nadwozie",
                     "property_description": "",
@@ -311,7 +311,7 @@
               "type": "oa-bundle-tier-selector",
               "settings": {
                 "heading": "Wybierz zakres ochrony",
-                "social_proof_text": "Najczęściej wybierane: 2 elementy",
+                "social_proof_text": "NajczÄ™Å›ciej wybierane: 2 elementy",
                 "collection": "elementy",
                 "discount_pct_2": 10,
                 "discount_pct_4": 20,
@@ -319,7 +319,7 @@
                 "label_tier_2": "2 elementy",
                 "label_tier_3": "4 elementy",
                 "badge_2": "Popularny",
-                "badge_3": "Najlepsza wartość",
+                "badge_3": "Najlepsza wartoÅ›Ä‡",
                 "label_counter": "Wybrano",
                 "label_separate": "Osobno",
                 "label_with_discount": "Z rabatem",
@@ -373,7 +373,7 @@
               "type": "text",
               "name": "Informacje o dostawie",
               "settings": {
-                "text": "<p>Darmowa dostawa od 199 zł • Docinane na zamówienie pod Twoje auto</p>",
+                "text": "<p>Darmowa dostawa od 199 zÅ‚ â€¢ Docinane na zamÃ³wienie pod Twoje auto</p>",
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "left",
@@ -399,8 +399,8 @@
               "type": "oa-trust-block",
               "settings": {
                 "icon": "truck",
-                "heading": "Wysyłka w 24-48 godzin",
-                "text": "Twoją wycinkę docinamy na zamówienie i wysyłamy w ciągu 24-48 godzin od zakupu.",
+                "heading": "WysyÅ‚ka w 24-48 godzin",
+                "text": "TwojÄ… wycinkÄ™ docinamy na zamÃ³wienie i wysyÅ‚amy w ciÄ…gu 24-48 godzin od zakupu.",
                 "padding-block-start": 2,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
@@ -410,9 +410,9 @@
             },
             "text_faq_heading": {
               "type": "text",
-              "name": "Nagłówek — FAQ",
+              "name": "NagÅ‚Ã³wek â€” FAQ",
               "settings": {
-                "text": "<h3>Najczęściej zadawane pytania</h3>",
+                "text": "<h3>NajczÄ™Å›ciej zadawane pytania</h3>",
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "left",
@@ -485,7 +485,7 @@
                     "faq_answer_1": {
                       "type": "text",
                       "settings": {
-                        "text": "<p>Folia jest praktycznie niewidoczna — to przezroczysta powłoka o grubości ułamka milimetra. Po poprawnym montażu nie zmienia wyglądu lakieru ani elementów piano black. Chroni, nie zmieniając stylu auta.</p>",
+                        "text": "<p>Folia jest praktycznie niewidoczna â€” to przezroczysta powÅ‚oka o gruboÅ›ci uÅ‚amka milimetra. Po poprawnym montaÅ¼u nie zmienia wyglÄ…du lakieru ani elementÃ³w piano black. Chroni, nie zmieniajÄ…c stylu auta.</p>",
                         "width": "100%"
                       },
                       "blocks": {}
@@ -496,7 +496,7 @@
                 "faq_row_2": {
                   "type": "_accordion-row",
                   "settings": {
-                    "heading": "Czy folię da się później zdjąć?",
+                    "heading": "Czy foliÄ™ da siÄ™ pÃ³Åºniej zdjÄ…Ä‡?",
                     "open_by_default": false,
                     "icon": "none",
                     "width": 20
@@ -505,7 +505,7 @@
                     "faq_answer_2": {
                       "type": "text",
                       "settings": {
-                        "text": "<p>Tak. Folia schodzi w całości, bez śladów kleju i bez uszkodzenia lakieru. Możesz ją zdjąć lub wymienić w dowolnym momencie — np. przed sprzedażą auta.</p>",
+                        "text": "<p>Tak. Folia schodzi w caÅ‚oÅ›ci, bez Å›ladÃ³w kleju i bez uszkodzenia lakieru. MoÅ¼esz jÄ… zdjÄ…Ä‡ lub wymieniÄ‡ w dowolnym momencie â€” np. przed sprzedaÅ¼Ä… auta.</p>",
                         "width": "100%"
                       },
                       "blocks": {}
@@ -516,7 +516,7 @@
                 "faq_row_3": {
                   "type": "_accordion-row",
                   "settings": {
-                    "heading": "Jak zamontować folię samodzielnie?",
+                    "heading": "Jak zamontowaÄ‡ foliÄ™ samodzielnie?",
                     "open_by_default": false,
                     "icon": "none",
                     "width": 20
@@ -525,7 +525,7 @@
                     "faq_answer_3": {
                       "type": "text",
                       "settings": {
-                        "text": "<p>Każda wycinka jest docięta pod Twoje auto, więc niczego nie tniesz samodzielnie. Czyścisz powierzchnię, zwilżasz ją wodą z kroplą płynu, przykładasz folię i wyganiasz wodę rakielką. Montaż jednego elementu zajmuje kilka minut.</p>",
+                        "text": "<p>KaÅ¼da wycinka jest dociÄ™ta pod Twoje auto, wiÄ™c niczego nie tniesz samodzielnie. CzyÅ›cisz powierzchniÄ™, zwilÅ¼asz jÄ… wodÄ… z kroplÄ… pÅ‚ynu, przykÅ‚adasz foliÄ™ i wyganiasz wodÄ™ rakielkÄ…. MontaÅ¼ jednego elementu zajmuje kilka minut.</p>",
                         "width": "100%"
                       },
                       "blocks": {}
@@ -536,7 +536,7 @@
                 "faq_row_4": {
                   "type": "_accordion-row",
                   "settings": {
-                    "heading": "Jak długo folia trzyma?",
+                    "heading": "Jak dÅ‚ugo folia trzyma?",
                     "open_by_default": false,
                     "icon": "none",
                     "width": 20
@@ -545,7 +545,7 @@
                     "faq_answer_4": {
                       "type": "text",
                       "settings": {
-                        "text": "<p>Folia PPF zachowuje właściwości ochronne przez lata codziennej eksploatacji. Jest odporna na żwir, myjnie, sól drogową i promieniowanie UV, a drobne rysy regenerują się same pod wpływem ciepła.</p>",
+                        "text": "<p>Folia PPF zachowuje wÅ‚aÅ›ciwoÅ›ci ochronne przez lata codziennej eksploatacji. Jest odporna na Å¼wir, myjnie, sÃ³l drogowÄ… i promieniowanie UV, a drobne rysy regenerujÄ… siÄ™ same pod wpÅ‚ywem ciepÅ‚a.</p>",
                         "width": "100%"
                       },
                       "blocks": {}
@@ -589,8 +589,8 @@
     "oa_process_steps": {
       "type": "oa-process-steps",
       "settings": {
-        "heading": "Montaż prostszy, niż myślisz",
-        "subheading": "Zestaw jest precyzyjnie docięty pod Twoje auto — niczego nie przycinasz. Wystarczy woda, rakielka i chwila spokoju.",
+        "heading": "MontaÅ¼ prostszy, niÅ¼ myÅ›lisz",
+        "subheading": "Zestaw jest precyzyjnie dociÄ™ty pod Twoje auto â€” niczego nie przycinasz. Wystarczy woda, rakielka i chwila spokoju.",
         "color_scheme": "scheme-1",
         "padding-block-start": 64,
         "padding-block-end": 64
@@ -599,8 +599,8 @@
         "step_1": {
           "type": "step",
           "settings": {
-            "heading": "Wyczyść i odtłuść",
-            "text": "Element musi być czysty i suchy. Wystarczy alkohol izopropylowy albo płyn do szyb.",
+            "heading": "WyczyÅ›Ä‡ i odtÅ‚uÅ›Ä‡",
+            "text": "Element musi byÄ‡ czysty i suchy. Wystarczy alkohol izopropylowy albo pÅ‚yn do szyb.",
             "duration": "~2 min"
           },
           "blocks": {}
@@ -608,8 +608,8 @@
         "step_2": {
           "type": "step",
           "settings": {
-            "heading": "Zwilż powierzchnię",
-            "text": "Woda z kroplą płynu do naczyń w spryskiwaczu. Dzięki niej folia daje się swobodnie pozycjonować.",
+            "heading": "ZwilÅ¼ powierzchniÄ™",
+            "text": "Woda z kroplÄ… pÅ‚ynu do naczyÅ„ w spryskiwaczu. DziÄ™ki niej folia daje siÄ™ swobodnie pozycjonowaÄ‡.",
             "duration": "~1 min"
           },
           "blocks": {}
@@ -617,8 +617,8 @@
         "step_3": {
           "type": "step",
           "settings": {
-            "heading": "Przyłóż wycinkę",
-            "text": "Folia jest docięta pod Twoje auto — niczego nie przycinasz. Ustaw na miejscu i dociśnij.",
+            "heading": "PrzyÅ‚Ã³Å¼ wycinkÄ™",
+            "text": "Folia jest dociÄ™ta pod Twoje auto â€” niczego nie przycinasz. Ustaw na miejscu i dociÅ›nij.",
             "duration": "~3 min"
           },
           "blocks": {}
@@ -626,8 +626,8 @@
         "step_4": {
           "type": "step",
           "settings": {
-            "heading": "Wygoń wodę i gotowe",
-            "text": "Rakielką, od środka na zewnątrz. Po kilku godzinach folia w pełni chwyta powierzchnię.",
+            "heading": "WygoÅ„ wodÄ™ i gotowe",
+            "text": "RakielkÄ…, od Å›rodka na zewnÄ…trz. Po kilku godzinach folia w peÅ‚ni chwyta powierzchniÄ™.",
             "duration": "~3 min"
           },
           "blocks": {}
@@ -637,9 +637,9 @@
     },
     "oa_extended_content_slot": {
       "type": "custom-liquid",
-      "name": "OA — slot na rozszerzony dowód",
+      "name": "OA â€” slot na rozszerzony dowÃ³d",
       "settings": {
-        "custom_liquid": "{% comment %} OA slot: tu wejdzie sekcja before/after (comparison-slider) + rozszerzony social proof pod buy boxem. Faza 2 — nie usuwać. {% endcomment %}",
+        "custom_liquid": "{% comment %} OA slot: tu wejdzie sekcja before/after (comparison-slider) + rozszerzony social proof pod buy boxem. Faza 2 â€” nie usuwaÄ‡. {% endcomment %}",
         "color_scheme": "scheme-1",
         "section_width": "page-width",
         "padding-block-start": 0,
@@ -648,13 +648,13 @@
     },
     "oa_content_why": {
       "type": "media-with-content",
-      "name": "OA — Dlaczego warto chronić detale",
+      "name": "OA â€” Dlaczego warto chroniÄ‡ detale",
       "settings": {
         "media_position": "left",
         "media_width": "medium",
         "media_height": "60svh",
         "section_width": "full-width",
-        "color_scheme": "scheme-4",
+        "color_scheme": "scheme-2",
         "padding-block-start": 0,
         "padding-block-end": 0
       },
@@ -683,7 +683,7 @@
                   "type": "text",
                   "name": "t:names.heading",
                   "settings": {
-                    "text": "<h3>Dlaczego warto chronić detale</h3>",
+                    "text": "<h3>Dlaczego warto chroniÄ‡ detale</h3>",
                     "type_preset": "h3"
                   },
                   "blocks": {}
@@ -691,7 +691,7 @@
                 "text": {
                   "type": "text",
                   "settings": {
-                    "text": "<p>Klamki, progi i krawędzie drzwi rysują się najszybciej — to ich dotykasz i obijasz na co dzień. Lakierowanie albo wymiana elementu kosztuje wielokrotność folii, która zatrzymuje te uszkodzenia, zanim powstaną.</p>",
+                    "text": "<p>Klamki, progi i krawÄ™dzie drzwi rysujÄ… siÄ™ najszybciej â€” to ich dotykasz i obijasz na co dzieÅ„. Lakierowanie albo wymiana elementu kosztuje wielokrotnoÅ›Ä‡ folii, ktÃ³ra zatrzymuje te uszkodzenia, zanim powstanÄ….</p>",
                     "max_width": "narrow",
                     "type_preset": "rte"
                   },
@@ -707,13 +707,13 @@
     },
     "oa_content_care": {
       "type": "media-with-content",
-      "name": "OA — Folia bez obsługi",
+      "name": "OA â€” Folia bez obsÅ‚ugi",
       "settings": {
         "media_position": "right",
         "media_width": "medium",
         "media_height": "60svh",
         "section_width": "full-width",
-        "color_scheme": "scheme-4",
+        "color_scheme": "scheme-2",
         "padding-block-start": 0,
         "padding-block-end": 0
       },
@@ -742,7 +742,7 @@
                   "type": "text",
                   "name": "t:names.heading",
                   "settings": {
-                    "text": "<h3>Folia, o którą nie musisz dbać</h3>",
+                    "text": "<h3>Folia, o ktÃ³rÄ… nie musisz dbaÄ‡</h3>",
                     "type_preset": "h3"
                   },
                   "blocks": {}
@@ -750,7 +750,7 @@
                 "text": {
                   "type": "text",
                   "settings": {
-                    "text": "<p>Myjesz auto tak, jak do tej pory — ręcznie albo na myjni. Drobne rysy znikają same pod wpływem ciepła, a powłoka chroni lakier przez lata bez dodatkowych zabiegów.</p>",
+                    "text": "<p>Myjesz auto tak, jak do tej pory â€” rÄ™cznie albo na myjni. Drobne rysy znikajÄ… same pod wpÅ‚ywem ciepÅ‚a, a powÅ‚oka chroni lakier przez lata bez dodatkowych zabiegÃ³w.</p>",
                     "max_width": "narrow",
                     "type_preset": "rte"
                   },
