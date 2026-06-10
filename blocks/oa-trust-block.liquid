@@ -1,0 +1,172 @@
+
+
+{%- doc -%}
+  OklejAuto trust / guarantee block (TryScent "risk-free" pattern).
+
+  Glass card with an icon, a short heading and 1-2 lines of reassurance,
+  placed under the delivery line in the buy box.
+{%- enddoc -%}
+
+{%- liquid
+  assign block_settings = block.settings
+-%}
+
+{%- if block_settings.heading != blank or block_settings.text != blank -%}
+  <div
+    class="oa-trust-block spacing-style"
+    style="{% render 'spacing-style', settings: block_settings %}"
+    {{ block.shopify_attributes }}
+  >
+    <div class="oa-trust-block__card oa-glass">
+      {%- if block_settings.icon != 'none' -%}
+        <svg
+          class="oa-trust-block__icon icon-default"
+          aria-hidden="true"
+          focusable="false"
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 20 20"
+        >
+          {%- render 'icon', icon: block_settings.icon -%}
+        </svg>
+      {%- endif -%}
+      <div class="oa-trust-block__copy">
+        {%- if block_settings.heading != blank -%}
+          <p class="oa-trust-block__heading">{{ block_settings.heading | escape }}</p>
+        {%- endif -%}
+        {%- if block_settings.text != blank -%}
+          <p class="oa-trust-block__text oa-muted">{{ block_settings.text | escape }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .oa-trust-block {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .oa-trust-block__card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-md);
+    min-width: 0;
+    padding: var(--padding-lg);
+  }
+
+  .oa-trust-block__icon {
+    flex-shrink: 0;
+    margin-block-start: 2px;
+    fill: currentcolor;
+    color: var(--oa-accent);
+  }
+
+  .oa-trust-block__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .oa-trust-block__heading {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: var(--font-weight-semibold, 600);
+    line-height: 1.35;
+  }
+
+  .oa-trust-block__text {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "OA — Gwarancja",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "Ikona",
+      "options": [
+        { "value": "none", "label": "Brak" },
+        { "value": "return", "label": "Zwrot" },
+        { "value": "check_box", "label": "Potwierdzenie" },
+        { "value": "lock", "label": "Kłódka" },
+        { "value": "heart", "label": "Serce" },
+        { "value": "star", "label": "Gwiazdka" },
+        { "value": "truck", "label": "Dostawa" }
+      ],
+      "default": "return"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Nagłówek",
+      "default": "Przetestuj 30 dni bez ryzyka"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Tekst",
+      "default": "Nie pasuje? Odeślij folię w ciągu 30 dni, a zwrócimy Ci pełną kwotę. Bez pytań."
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "OA — Gwarancja",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

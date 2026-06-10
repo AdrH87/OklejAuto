@@ -1,19 +1,36 @@
 
 
+{%- doc -%}
+  OklejAuto benefit badges (TryScent PDP pattern).
+
+  Three compact icon + label cards reinforcing the product promise.
+
+  Mobile / tablet (<990px): three full-width rows rendered in normal flow.
+  Placed as the FIRST block of the details column, they appear directly
+  under the product image on mobile.
+
+  Desktop (>=990px): the list becomes a vertical rail overlaid along the
+  RIGHT EDGE of the gallery image. Mechanism: the block root collapses to
+  height 0 (so it doesn't push the buy box down) and the list is positioned
+  absolutely at `right: calc(100% + offset)` — i.e. just left of the details
+  column, which lands on the gallery's right edge. No theme gallery files
+  are touched, so the overlay survives gallery setting changes.
+{%- enddoc -%}
+
 {%- liquid
   assign block_settings = block.settings
 -%}
 
 <div
-  class="oa-selling-points spacing-style"
+  class="oa-benefit-badges spacing-style"
   style="{% render 'spacing-style', settings: block_settings %}"
   {{ block.shopify_attributes }}
 >
   <ul
-    class="oa-selling-points__list"
+    class="oa-benefit-badges__list"
     role="list"
   >
-    {%- for index in (1..4) -%}
+    {%- for index in (1..3) -%}
       {%- liquid
         assign icon_key = 'icon_' | append: index
         assign label_key = 'label_' | append: index
@@ -21,21 +38,21 @@
         assign item_label = block_settings[label_key]
       -%}
       {%- if item_label != blank -%}
-        <li class="oa-selling-points__item">
+        <li class="oa-benefit-badges__item oa-glass">
           {%- if item_icon != 'none' -%}
             <svg
-              class="oa-selling-points__icon icon-default"
+              class="oa-benefit-badges__icon icon-default"
               aria-hidden="true"
               focusable="false"
               xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
+              width="18"
+              height="18"
               viewBox="0 0 20 20"
             >
               {%- render 'icon', icon: item_icon -%}
             </svg>
           {%- endif -%}
-          <span class="oa-selling-points__label">{{ item_label | escape }}</span>
+          <span class="oa-benefit-badges__label">{{ item_label | escape }}</span>
         </li>
       {%- endif -%}
     {%- endfor -%}
@@ -43,64 +60,85 @@
 </div>
 
 {% stylesheet %}
-  .oa-selling-points {
+  .oa-benefit-badges {
     width: 100%;
     min-width: 0;
   }
 
-  /* Fixed 4-up attribute row: icon above label. Wraps to 2x2 on narrow
-     viewports via the media query below — never scrolls or crops. */
-  .oa-selling-points__list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--gap-sm) var(--gap-xs);
+  .oa-benefit-badges__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .oa-selling-points__item {
+  /* Mobile-first: compact full-width rows (icon left, label right) */
+  .oa-benefit-badges__item {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: var(--gap-xs);
+    gap: var(--gap-sm);
     min-width: 0;
-    text-align: center;
+    padding: var(--padding-sm) var(--padding-md);
   }
 
-  .oa-selling-points__icon {
+  .oa-benefit-badges__icon {
     flex-shrink: 0;
     fill: currentcolor;
     color: var(--oa-accent);
   }
 
-  .oa-selling-points__label {
-    color: var(--color-foreground);
-    font-size: 0.75rem;
-    line-height: 1.3;
+  .oa-benefit-badges__label {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    font-weight: var(--font-weight-medium, 500);
     overflow-wrap: break-word;
     min-width: 0;
   }
 
-  @media screen and (min-width: 480px) {
-    .oa-selling-points__list {
-      grid-template-columns: repeat(4, 1fr);
+  /* Desktop: vertical rail overlaid on the gallery's right edge.
+     Height collapses to 0 so the rail doesn't consume buy-box flow. */
+  @media screen and (min-width: 990px) {
+    .oa-benefit-badges {
+      position: relative;
+      height: 0;
+      overflow: visible;
+    }
+
+    .oa-benefit-badges__list {
+      position: absolute;
+      top: var(--padding-md);
+      right: calc(100% + 40px);
+      width: 176px;
+      gap: var(--gap-sm);
+      z-index: 2;
+    }
+
+    .oa-benefit-badges__item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--gap-xs);
+      padding: var(--padding-md);
+      /* Legibility on top of photography: darken + blur behind the glass */
+      background: rgb(17 17 17 / 0.72);
+      backdrop-filter: blur(6px);
     }
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "OA — Atuty produktu",
+  "name": "OA — Odznaki przy zdjęciu",
   "tag": null,
   "settings": [
     {
       "type": "paragraph",
-      "content": "Kompaktowy rząd 4 atutów: ikona nad krótką etykietą. Na wąskich ekranach zawija się do 2x2."
+      "content": "Trzy odznaki korzyści. Na mobile: trzy rzędy pod zdjęciem produktu. Na desktopie: pionowa kolumna nałożona na prawą krawędź zdjęcia."
     },
     {
       "type": "header",
-      "content": "Atut 1"
+      "content": "Odznaka 1"
     },
     {
       "type": "select",
@@ -128,11 +166,11 @@
       "type": "text",
       "id": "label_1",
       "label": "Tekst",
-      "default": "Samoregeneracja"
+      "default": "Samoregenerująca powłoka"
     },
     {
       "type": "header",
-      "content": "Atut 2"
+      "content": "Odznaka 2"
     },
     {
       "type": "select",
@@ -160,11 +198,11 @@
       "type": "text",
       "id": "label_2",
       "label": "Tekst",
-      "default": "Niewidoczna"
+      "default": "Niewidoczna po montażu"
     },
     {
       "type": "header",
-      "content": "Atut 3"
+      "content": "Odznaka 3"
     },
     {
       "type": "select",
@@ -186,43 +224,11 @@
         { "value": "fire", "label": "Ogień" },
         { "value": "leaf", "label": "Liść" }
       ],
-      "default": "stopwatch"
-    },
-    {
-      "type": "text",
-      "id": "label_3",
-      "label": "Tekst",
-      "default": "Montaż DIY"
-    },
-    {
-      "type": "header",
-      "content": "Atut 4"
-    },
-    {
-      "type": "select",
-      "id": "icon_4",
-      "label": "Ikona",
-      "options": [
-        { "value": "none", "label": "Brak" },
-        { "value": "recycle", "label": "Regeneracja" },
-        { "value": "eye", "label": "Oko" },
-        { "value": "stopwatch", "label": "Stoper" },
-        { "value": "check_box", "label": "Potwierdzenie" },
-        { "value": "star", "label": "Gwiazdka" },
-        { "value": "lock", "label": "Kłódka" },
-        { "value": "lightning_bolt", "label": "Błyskawica" },
-        { "value": "snowflake", "label": "Śnieżynka" },
-        { "value": "truck", "label": "Dostawa" },
-        { "value": "return", "label": "Zwrot" },
-        { "value": "heart", "label": "Serce" },
-        { "value": "fire", "label": "Ogień" },
-        { "value": "leaf", "label": "Liść" }
-      ],
       "default": "check_box"
     },
     {
       "type": "text",
-      "id": "label_4",
+      "id": "label_3",
       "label": "Tekst",
       "default": "Gwarancja trwałości"
     },
@@ -273,7 +279,7 @@
   ],
   "presets": [
     {
-      "name": "OA — Atuty produktu",
+      "name": "OA — Odznaki przy zdjęciu",
       "category": "t:categories.product"
     }
   ]

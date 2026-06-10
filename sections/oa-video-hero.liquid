@@ -88,19 +88,21 @@
   <div class="oa-hero__overlay" aria-hidden="true"></div>
 
   <div class="oa-hero__content section section--page-width">
-    {%- if section.settings.heading != blank -%}
-      <h1 class="oa-hero__heading">{{ section.settings.heading }}</h1>
-    {%- endif -%}
+    <div class="oa-hero__stack">
+      {%- if section.settings.heading != blank -%}
+        <h1 class="oa-hero__heading">{{ section.settings.heading }}</h1>
+      {%- endif -%}
 
-    {%- if section.settings.subheading != blank -%}
-      <p class="oa-hero__subheading">{{ section.settings.subheading }}</p>
-    {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="oa-hero__subheading">{{ section.settings.subheading }}</p>
+      {%- endif -%}
 
-    {%- if section.settings.cta_label != blank -%}
-      <a href="{{ cta_link }}" class="oa-hero__cta">
-        {{ section.settings.cta_label }}
-      </a>
-    {%- endif -%}
+      {%- if section.settings.cta_label != blank -%}
+        <a href="{{ cta_link }}" class="oa-hero__cta">
+          {{ section.settings.cta_label }}
+        </a>
+      {%- endif -%}
+    </div>
   </div>
 </div>
 
@@ -148,16 +150,26 @@
     pointer-events: none;
   }
 
+  /*
+   * .oa-hero__content keeps the theme's .section grid (margin | content | margin
+   * columns from --full-page-grid-with-margins) so the copy aligns with every
+   * other page-width section. The flex stack lives on the inner wrapper —
+   * overriding display on the .section itself would erase the page margins
+   * (that was the "content hugs the left edge" bug).
+   */
   .oa-hero__content {
     position: relative;
     z-index: 3;
     width: 100%;
+    padding-block-start: var(--padding-block-start, 0);
+    padding-block-end: var(--padding-block-end, 48px);
+  }
+
+  .oa-hero__stack {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-    padding-block-start: var(--padding-block-start, 0);
-    padding-block-end: var(--padding-block-end, 48px);
   }
 
   .oa-hero__heading {
@@ -205,8 +217,11 @@
 
   @media screen and (min-width: 750px) {
     .oa-hero__content {
-      gap: 20px;
       padding-block-end: var(--padding-block-end, 72px);
+    }
+
+    .oa-hero__stack {
+      gap: 20px;
     }
   }
 {% endstylesheet %}

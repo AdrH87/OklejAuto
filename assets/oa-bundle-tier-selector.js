@@ -6,9 +6,9 @@ import { fetchConfig } from '@theme/utilities';
 /**
  * Bundle tier selector for OklejAuto PDPs.
  *
- * Radio tap-tiles: tile 1 ("Sam element") is the current element product,
- * tiles 2+ are "Pakiet" bundle products referenced by the `oa.pakiety`
- * metafield (list.product_reference).
+ * Horizontal radio tap-tiles: tile 1 ("Sam element") is the current element
+ * product, tiles 2+ are "Pakiet" bundle products referenced by the
+ * `oklejauto.pakiety` metafield (list.product_reference).
  *
  * Tile 1 never owns a variant id. The theme's native variant flow
  * (variant-picker + product-form + product-price) keeps ownership of the
@@ -20,12 +20,28 @@ import { fetchConfig } from '@theme/utilities';
  * exists in the DOM at all times — a nested duplicate would hijack
  * ProductPrice.refs (last-write-wins in Component#updateRefs). Selecting
  * tile 1 hands control back by restoring the captured state.
+ * (If the merchant removes the standalone price block, the live container is
+ * simply absent and the swap is skipped — the count never exceeds one.)
+ *
+ * Two presentation concerns ride on the same selection state:
+ *
+ * 1. Fold-open value stack — one server-rendered panel per pakiet
+ *    ([data-tier-panel], keyed by variant id, hidden via grid-rows 0fr).
+ *    #syncPanels only toggles `data-open`/`aria-hidden`; no fetches.
+ * 2. Button price label — the add-to-cart button carries the active tier's
+ *    price ("Dodaj do koszyka — <s>compare</s> price"). #updateButtonPrice
+ *    appends a server-rendered <template data-button-price-for> fragment
+ *    (money formatted in Liquid, never in JS) into the button label,
+ *    idempotently (previous fragment removed first).
  *
  * On variant:update the captured state is stale (the theme rewrote the input
- * and re-rendered the price), so captures are dropped and the selected pakiet
- * is re-applied in a microtask — guaranteed to run after every synchronous
- * section listener (product-form, product-price) of the same event,
- * regardless of listener registration order.
+ * and re-rendered the price), so captures are dropped, the "current" tile
+ * price + "current" button-price template are refreshed from the new section
+ * render, and the selected pakiet is re-applied in a microtask — guaranteed
+ * to run after every synchronous section listener (product-form,
+ * product-price) of the same event, regardless of listener registration
+ * order. The microtask also re-syncs the panels and the button label, which
+ * a full-section morph resets to their server-rendered defaults.
  *
  * Selection survives full-section morphs (e.g. the variant-picker 'main'
  * path) by mirroring the theme's variant-picker pattern: the selected radio
@@ -127,6 +143,9 @@ class OaBundleTierSelector extends Component {
     } else {
       this.#restoreNativeTier();
     }
+
+    this.#syncPanels(input);
+    this.#updateButtonPrice(input);
   }
 
   /**
@@ -174,10 +193,62 @@ class OaBundleTierSelector extends Component {
   }
 
   /**
+   * Opens the value-stack panel of the selected pakiet, closes the rest.
+   * Panels are server-rendered and keyed by variant id; "Sam element" keeps
+   * everything collapsed. Pure attribute toggling — no fetches.
+   * @param {HTMLInputElement | null} input - The selected tier radio.
+   */
+  #syncPanels(input) {
+    const openId = input?.dataset.tier === 'pakiet' ? input.value : null;
+
+    for (const panel of this.querySelectorAll('[data-tier-panel]')) {
+      if (!(panel instanceof HTMLElement)) continue;
+      const isOpen = openId !== null && panel.dataset.variantId === openId;
+
+      if (isOpen) {
+        panel.dataset.open = 'true';
+        panel.setAttribute('aria-hidden', 'false');
+      } else {
+        delete panel.dataset.open;
+        panel.setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+
+  /**
+   * Appends the selected tier's server-rendered price fragment to every
+   * add-to-cart button label in the form ("Dodaj do koszyka — <s>compare</s>
+   * price") — there can be more than one (e.g. sticky ATC). Idempotent: all
+   * previous fragments are removed first, so morphs and repeated calls never
+   * stack fragments.
+   * @param {HTMLInputElement | null} input - The selected tier radio.
+   */
+  #updateButtonPrice(input) {
+    const form = this.#form;
+    if (!form) return;
+
+    for (const fragment of form.querySelectorAll('.oa-atc-price')) {
+      fragment.remove();
+    }
+
+    if (!input) return;
+
+    const key = input.dataset.tier === 'pakiet' ? input.value : 'current';
+    const template = this.querySelector(`template[data-button-price-for="${key}"]`);
+
+    if (!(template instanceof HTMLTemplateElement)) return;
+
+    for (const target of form.querySelectorAll('.add-to-cart-text__content')) {
+      target.append(template.content.cloneNode(true));
+    }
+  }
+
+  /**
    * After the theme finishes a variant update: product-form has rewritten the
    * hidden variant input, product-price has re-rendered the native price, and
-   * a full-section morph may have re-rendered the radios. Drop the now-stale
-   * captures, refresh tile 1's mini price, then re-assert the selected tier.
+   * a full-section morph may have re-rendered the radios, panels and button.
+   * Drop the now-stale captures, refresh tile 1's mini price and the
+   * "current" button-price fragment, then re-assert the selected tier.
    * @param {CustomEvent} event
    */
   #onVariantUpdate = (event) => {
@@ -186,11 +257,15 @@ class OaBundleTierSelector extends Component {
       this.#nativePriceNodes = null;
 
       this.#updateCurrentTilePrice(event);
+      this.#updateCurrentButtonPriceTemplate(event);
 
       const selected = this.#selectedInput;
       if (!selected) return;
       if (!selected.checked) selected.checked = true;
       if (selected.dataset.tier === 'pakiet') this.#applyPakiet(selected);
+
+      this.#syncPanels(selected);
+      this.#updateButtonPrice(selected);
     });
   };
 
@@ -210,6 +285,26 @@ class OaBundleTierSelector extends Component {
 
     if (newPrice && currentPrice && currentPrice.textContent !== newPrice.textContent) {
       currentPrice.textContent = newPrice.textContent;
+    }
+  }
+
+  /**
+   * Refreshes the "current" tier's button-price fragment from the section
+   * render, so the button label tracks the theme-selected variant. Pakiet
+   * fragments are static per variant id and never need refreshing.
+   * @param {CustomEvent} event
+   */
+  #updateCurrentButtonPriceTemplate(event) {
+    const html = event.detail?.data?.html;
+    if (!html) return;
+
+    const newTemplate = html.querySelector(
+      `oa-bundle-tier-selector[data-block-id="${this.dataset.blockId}"] template[data-button-price-for="current"]`
+    );
+    const currentTemplate = this.querySelector('template[data-button-price-for="current"]');
+
+    if (newTemplate instanceof HTMLTemplateElement && currentTemplate instanceof HTMLTemplateElement) {
+      currentTemplate.content.replaceChildren(...newTemplate.content.cloneNode(true).childNodes);
     }
   }
 

@@ -162,4 +162,16 @@
   .product-card product-price {
     font-weight: 600;
   }
+
+  /* Density pass: compact spec pills (smaller type + tighter padding than the
+     global .oa-pill primitive — beaten by specificity, not !important) */
+  .product-card .product-card-specs {
+    gap: 4px;
+    margin-block-start: 0;
+  }
+
+  .product-card .product-card-specs .oa-pill {
+    padding: 0.2em 0.7em;
+    font-size: 0.75rem;
+  }
 {% endstylesheet %}

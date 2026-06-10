@@ -1,21 +1,37 @@
 
 
 {%- doc -%}
-  OklejAuto bundle tier selector.
+  OklejAuto bundle tier selector (TryScent PDP pattern).
 
-  Renders radio tap-tiles: tile 1 is the current element product on its own,
-  tiles 2+ are "Pakiet" bundle products referenced by the product metafield
-  `oklejauto.pakiety` (type: list.product_reference).
+  Renders a horizontal row of radio tap-tiles: tile 1 is the current element
+  product on its own, tiles 2+ are "Pakiet" bundle products referenced by the
+  product metafield `oklejauto.pakiety` (type: list.product_reference).
+
+  Each pakiet tile can carry a marketing flag ("Popularny" / "Bestseller"):
+  metafield-first (`oklejauto.badge`, single_line_text on the pakiet product),
+  falling back to the block's badge_1..badge_3 settings (matched by the
+  pakiet's position in the `oklejauto.pakiety` list).
+
+  Below the tiles, one fold-open value-stack panel per pakiet is PRE-RENDERED
+  server-side (hidden, grid-template-rows 0fr) from the pakiet's
+  `oklejauto.sklad` metafield (list.product_reference): each component
+  product's title + live price, then "Osobno: [suma]" (crossed out) and
+  "W pakiecie: [cena] (−X%)" — all from real prices, no manual copy.
+  No sklad metafield -> the panel gracefully shows just the savings line
+  (compare_at_price as the "Osobno" reference). JS only toggles which panel
+  is open — there are no fetches.
 
   Savings convention: the client sets each pakiet's compare_at_price to the
-  sum of its element prices, so the "Oszczędzasz X" badge is computed as
-  compare_at_price - price. No compare_at_price -> no badge.
+  sum of its element prices.
 
   Selecting a pakiet tile swaps the variant id submitted by the section's
   product form (hidden input[name="id"]), so the vehicle line-item properties
   ride along no matter which product is added. Tile 1 ("Sam element") never
   bakes a variant id — it hands control back to the theme's native variant
-  flow (variant-picker + product-form own the input and the price block).
+  flow (variant-picker + product-form own the input and the price display).
+  The add-to-cart button label carries the active tier's price
+  (crossed-out compare_at + current), server-rendered per tier in
+  <template data-button-price-for> fragments so the JS never formats money.
   Logic: assets/oa-bundle-tier-selector.js
 
   Graceful degradation: metafield empty/missing -> the block renders nothing
@@ -33,6 +49,10 @@
   assign pakiety = product.metafields.oklejauto.pakiety.value
   assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id
   assign radio_group_name = 'oa-tier-' | append: block.id
+
+  assign label_includes = block_settings.label_includes | default: 'W zestawie'
+  assign label_separate = block_settings.label_separate | default: 'Osobno'
+  assign label_bundle = block_settings.label_bundle | default: 'W pakiecie'
 -%}
 
 {%- if product != blank and pakiety != blank -%}
@@ -53,6 +73,10 @@
       >
         {{ block_settings.heading | escape }}
       </p>
+    {%- endif -%}
+
+    {%- if block_settings.social_proof_text != blank -%}
+      <p class="oa-tier-selector__proof oa-muted">{{ block_settings.social_proof_text | escape }}</p>
     {%- endif -%}
 
     <div
@@ -77,13 +101,8 @@
           checked
           on:change="/handleTierChange"
         >
-        <span class="oa-tier__body">
-          <span class="oa-tier__name">{{ block_settings.current_label | escape }}</span>
-          <span class="oa-tier__sub oa-muted">{{ product.title | escape }}</span>
-        </span>
-        <span class="oa-tier__meta">
-          <span class="oa-tier__price" data-tier-price="current">{{ current_variant.price | money }}</span>
-        </span>
+        <span class="oa-tier__name">{{ block_settings.current_label | escape }}</span>
+        <span class="oa-tier__price" data-tier-price="current">{{ current_variant.price | money }}</span>
       </label>
 
       {%- for pakiet in pakiety -%}
@@ -93,12 +112,11 @@
             continue
           endif
 
-          assign savings = 0
-          if pakiet_variant.compare_at_price > pakiet_variant.price
-            assign savings = pakiet_variant.compare_at_price | minus: pakiet_variant.price
+          assign flag_text = pakiet.metafields.oklejauto.badge.value
+          if flag_text == blank
+            assign badge_key = 'badge_' | append: forloop.index
+            assign flag_text = block_settings[badge_key]
           endif
-
-          assign pakiet_subtitle = pakiet.metafields.descriptors.subtitle.value
         -%}
         <label class="oa-tier oa-glass{% unless pakiet_variant.available %} oa-tier--unavailable{% endunless %}">
           <input
@@ -112,33 +130,139 @@
             {% endunless %}
             on:change="/handleTierChange"
           >
-          <span class="oa-tier__body">
-            <span class="oa-tier__name">{{ pakiet.title | escape }}</span>
-            {%- if pakiet_subtitle != blank -%}
-              <span class="oa-tier__sub oa-muted">{{ pakiet_subtitle | escape }}</span>
-            {%- endif -%}
-          </span>
-          <span class="oa-tier__meta">
-            {%- if savings > 0 -%}
-              <span class="oa-tier__badge">{{ block_settings.savings_prefix | escape }} {{ savings | money }}</span>
-            {%- endif -%}
-            {%- unless pakiet_variant.available -%}
-              <span class="oa-tier__badge oa-tier__badge--unavailable">Chwilowo niedostępny</span>
-            {%- endunless -%}
-            <span class="oa-tier__price">{{ pakiet_variant.price | money }}</span>
-          </span>
+          {%- if pakiet_variant.available == false -%}
+            <span class="oa-tier__flag oa-tier__flag--muted">Niedostępny</span>
+          {%- elsif flag_text != blank -%}
+            <span class="oa-tier__flag">{{ flag_text | escape }}</span>
+          {%- endif -%}
+          <span class="oa-tier__name">{{ pakiet.title | escape }}</span>
+          <span class="oa-tier__price">{{ pakiet_variant.price | money }}</span>
         </label>
-
-        {%- comment -%}
-          Server-rendered price markup per pakiet. The JS clones only the
-          CHILDREN of the snippet's [ref="priceContainer"] wrapper into the
-          live price container — the DOM must never hold two priceContainer refs.
-        {%- endcomment -%}
-        <template data-variant-id="{{ pakiet_variant.id }}">
-          {%- render 'price', product_resource: pakiet, show_sale_price_first: true -%}
-        </template>
       {%- endfor -%}
     </div>
+
+    {%- comment -%}
+      Fold-open value stacks: one pre-rendered panel per pakiet, keyed by
+      variant id. Collapsed by default; the JS opens the panel matching the
+      selected pakiet tile (and keeps it in sync across section morphs).
+    {%- endcomment -%}
+    {%- for pakiet in pakiety -%}
+      {%- liquid
+        assign pakiet_variant = pakiet.selected_or_first_available_variant
+        if pakiet_variant == blank
+          continue
+        endif
+
+        assign sklad = pakiet.metafields.oklejauto.sklad.value
+
+        assign osobno = 0
+        if sklad != blank
+          for component in sklad
+            if component != blank
+              assign osobno = osobno | plus: component.price
+            endif
+          endfor
+        endif
+        if osobno == 0 and pakiet_variant.compare_at_price > pakiet_variant.price
+          assign osobno = pakiet_variant.compare_at_price
+        endif
+
+        assign savings_pct = 0
+        if osobno > pakiet_variant.price
+          assign savings_pct = osobno | minus: pakiet_variant.price | times: 100.0 | divided_by: osobno | round
+        endif
+      -%}
+      <div
+        class="oa-tier-panel"
+        data-tier-panel
+        data-variant-id="{{ pakiet_variant.id }}"
+        aria-hidden="true"
+      >
+        <div class="oa-tier-panel__clip">
+          <div class="oa-tier-panel__card oa-glass">
+            {%- if sklad != blank -%}
+              <p class="oa-tier-panel__heading">{{ label_includes | escape }} — {{ pakiet.title | escape }}:</p>
+              <ul
+                class="oa-tier-panel__list"
+                role="list"
+              >
+                {%- for component in sklad -%}
+                  {%- if component != blank -%}
+                    <li class="oa-tier-panel__row">
+                      <span class="oa-tier-panel__component">{{ component.title | escape }}</span>
+                      <span class="oa-tier-panel__component-price oa-muted">{{ component.price | money }}</span>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+            <div class="oa-tier-panel__totals">
+              {%- if osobno > pakiet_variant.price -%}
+                <p class="oa-tier-panel__separate oa-muted">
+                  {{ label_separate | escape }}: <s>{{ osobno | money }}</s>
+                </p>
+                <p class="oa-tier-panel__bundle">
+                  {{ label_bundle | escape }}: <strong>{{ pakiet_variant.price | money }}</strong>
+                  {%- if savings_pct > 0 %}
+                    <span class="oa-tier-panel__pct">(−{{ savings_pct }}%)</span>
+                  {%- endif -%}
+                </p>
+              {%- else -%}
+                <p class="oa-tier-panel__bundle">
+                  {{ label_bundle | escape }}: <strong>{{ pakiet_variant.price | money }}</strong>
+                </p>
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      </div>
+    {%- endfor -%}
+
+    {%- comment -%}
+      Server-rendered swap fragments, keyed by variant id.
+
+      1. data-variant-id: full price markup per pakiet. The JS clones only the
+         CHILDREN of the snippet's [ref="priceContainer"] wrapper into the
+         live price container — the DOM must never hold two priceContainer refs.
+      2. data-button-price-for: compact price fragment appended to the
+         add-to-cart button label ("current" = the element product itself).
+         Money is always formatted here, server-side — never in JS.
+    {%- endcomment -%}
+    <template data-button-price-for="current">
+      <span class="oa-atc-price">
+        <span aria-hidden="true">—</span>
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <s
+            class="oa-atc-price__compare"
+            aria-hidden="true"
+          >{{ current_variant.compare_at_price | money }}</s>
+        {%- endif %}
+        <span class="oa-atc-price__amount"><span class="visually-hidden">Cena:&nbsp;</span>{{ current_variant.price | money }}</span>
+      </span>
+    </template>
+    {%- for pakiet in pakiety -%}
+      {%- liquid
+        assign pakiet_variant = pakiet.selected_or_first_available_variant
+        if pakiet_variant == blank
+          continue
+        endif
+      -%}
+      <template data-variant-id="{{ pakiet_variant.id }}">
+        {%- render 'price', product_resource: pakiet, show_sale_price_first: true -%}
+      </template>
+      <template data-button-price-for="{{ pakiet_variant.id }}">
+        <span class="oa-atc-price">
+          <span aria-hidden="true">—</span>
+          {%- if pakiet_variant.compare_at_price > pakiet_variant.price -%}
+            <s
+              class="oa-atc-price__compare"
+              aria-hidden="true"
+            >{{ pakiet_variant.compare_at_price | money }}</s>
+          {%- endif %}
+          <span class="oa-atc-price__amount"><span class="visually-hidden">Cena:&nbsp;</span>{{ pakiet_variant.price | money }}</span>
+        </span>
+      </template>
+    {%- endfor -%}
   </oa-bundle-tier-selector>
 
   <script
@@ -151,7 +275,7 @@
     class="oa-tier-selector__editor-hint oa-muted"
     {{ block.shopify_attributes }}
   >
-    Selektor pakietów: dodaj do produktu metafield „oklejauto.pakiety” (lista produktów), aby pokazać kafelki pakietów. Bez metafielda blok nie renderuje niczego, a zwykły przycisk „Dodaj do koszyka” działa normalnie.
+    Selektor pakietów: dodaj do produktu metafield „oklejauto.pakiety” (lista produktów), aby pokazać kafelki pakietów. Skład panelu rozwijanego: metafield „oklejauto.sklad” (lista produktów) NA produkcie pakietu. Bez metafielda blok nie renderuje niczego, a zwykły przycisk „Dodaj do koszyka” działa normalnie.
   </div>
 {%- endif -%}
 
@@ -163,24 +287,40 @@
   }
 
   .oa-tier-selector__heading {
-    margin-block: 0 var(--padding-sm);
+    margin-block: 0;
     margin-inline: 0;
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold, 600);
   }
 
+  .oa-tier-selector__proof {
+    margin-block: 2px 0;
+    margin-inline: 0;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  /* Horizontal tile row: as many equal columns as fit (3-up for the typical
+     element + 2 pakiety case). Tracks never shrink below 92px, extra tiles
+     wrap to a new row — no horizontal scroll, no cropping. */
   .oa-tier-selector__group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-sm);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: var(--gap-xs);
+    padding-block-start: 10px; /* room for the overlapping flags */
+    margin-block-start: var(--gap-xs);
   }
 
   .oa-tier {
+    position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--gap-md);
-    min-height: 44px;
-    padding: var(--padding-md) var(--padding-lg);
+    justify-content: center;
+    gap: 2px;
+    min-height: 64px;
+    min-width: 0;
+    padding: var(--padding-sm) var(--padding-2xs);
+    text-align: center;
     cursor: pointer;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
@@ -205,63 +345,169 @@
     cursor: not-allowed;
   }
 
-  .oa-tier__body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-
-  .oa-tier__name {
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .oa-tier__sub {
-    font-size: 0.8125rem;
-  }
-
-  .oa-tier__meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--gap-xs);
-    flex-shrink: 0;
-  }
-
-  .oa-tier__badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.2em 0.7em;
-    background: color-mix(in srgb, var(--oa-accent) 14%, transparent);
-    border: 1px solid color-mix(in srgb, var(--oa-accent) 40%, transparent);
+  /* Overflow hardening: the flag may never grow past its tile's track
+     (+8px grace), no matter how long the merchant's badge text is —
+     long values ellipsize instead of colliding with the neighbor flag.
+     Mobile-first: tighter font/padding, relaxed from 480px up. */
+  .oa-tier__flag {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    max-width: calc(100% + 8px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.15em 0.55em;
+    background: var(--oa-accent);
     border-radius: var(--oa-radius-pill);
-    color: var(--oa-accent);
-    font-size: 0.75rem;
-    line-height: 1.4;
+    color: #111111;
+    font-size: 0.5625rem;
+    font-weight: var(--font-weight-semibold, 600);
+    line-height: 1.5;
     white-space: nowrap;
   }
 
-  .oa-tier__badge--unavailable {
-    background: var(--oa-surface-glass);
-    border-color: var(--oa-border-glass);
+  @media screen and (min-width: 480px) {
+    .oa-tier__flag {
+      padding: 0.15em 0.7em;
+      font-size: 0.625rem;
+    }
+  }
+
+  .oa-tier__flag--muted {
+    background: var(--oa-surface-card);
+    border: 1px solid var(--oa-border-glass);
     color: var(--oa-text-muted);
   }
 
+  .oa-tier__name {
+    font-size: 0.8125rem;
+    font-weight: var(--font-weight-semibold, 600);
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .oa-tier__price {
-    font-weight: var(--font-weight-semibold);
+    font-size: 0.8125rem;
+    line-height: 1.25;
+    color: var(--oa-text-muted);
+  }
+
+  .oa-tier:has(.oa-tier__input:checked) .oa-tier__price {
+    color: var(--color-foreground);
+  }
+
+  /* Fold-open value stack: grid-rows 0fr -> 1fr keyed off data-open,
+     toggled by the component JS when a pakiet tile is selected. */
+  .oa-tier-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+  }
+
+  .oa-tier-panel[data-open='true'] {
+    grid-template-rows: 1fr;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .oa-tier-panel {
+      transition: grid-template-rows 0.3s var(--ease-out-quad, ease);
+    }
+  }
+
+  .oa-tier-panel__clip {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .oa-tier-panel__card {
+    margin-block-start: var(--gap-sm);
+    padding: var(--padding-md) var(--padding-lg);
+  }
+
+  .oa-tier-panel__heading {
+    margin: 0 0 var(--padding-2xs);
+    font-size: 0.8125rem;
+    font-weight: var(--font-weight-semibold, 600);
+  }
+
+  .oa-tier-panel__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .oa-tier-panel__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--gap-sm);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+  .oa-tier-panel__component {
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  .oa-tier-panel__component-price {
+    flex-shrink: 0;
+  }
+
+  .oa-tier-panel__totals {
+    margin-block-start: var(--padding-2xs);
+    padding-block-start: var(--padding-2xs);
+    border-top: 1px solid var(--oa-border-glass);
+  }
+
+  .oa-tier-panel__list + .oa-tier-panel__totals {
+    margin-block-start: var(--padding-sm);
+    padding-block-start: var(--padding-sm);
+  }
+
+  .oa-tier-panel__separate {
+    margin: 0;
+    font-size: 0.8125rem;
+  }
+
+  .oa-tier-panel__bundle {
+    margin: 2px 0 0;
+    font-size: 0.875rem;
+  }
+
+  .oa-tier-panel__bundle strong {
+    font-weight: var(--font-weight-semibold, 600);
+  }
+
+  .oa-tier-panel__pct {
+    color: var(--oa-accent);
+    font-weight: var(--font-weight-semibold, 600);
+  }
+
+  /* Price fragment injected into the add-to-cart button label */
+  .oa-atc-price {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+    margin-inline-start: 0.4em;
+  }
+
+  .oa-atc-price__compare {
+    opacity: 0.6;
+    font-weight: var(--font-weight-normal, 400);
+  }
+
+  .oa-atc-price__amount {
+    font-weight: var(--font-weight-semibold, 600);
   }
 
   .oa-tier-selector__editor-hint {
     font-size: 0.8125rem;
-  }
-
-  /* Desktop refinement: badge and price share one row */
-  @media screen and (min-width: 750px) {
-    .oa-tier__meta {
-      flex-direction: row;
-      align-items: center;
-      gap: var(--gap-sm);
-    }
   }
 {% endstylesheet %}
 
@@ -272,13 +518,19 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Kafelki pakietów ładowane z metafielda produktu „oklejauto.pakiety” (lista produktów). Oszczędność = cena porównawcza pakietu minus cena (cena porównawcza pakietu = suma cen elementów, ustawiana ręcznie)."
+      "content": "Kafelki pakietów ładowane z metafielda produktu „oklejauto.pakiety” (lista produktów). Panel rozwijany pod kafelkami pokazuje skład z metafielda „oklejauto.sklad” (lista produktów na produkcie pakietu) i wyliczone oszczędności z realnych cen."
     },
     {
       "type": "text",
       "id": "heading",
-      "label": "Nagłówek",
+      "label": "Nagłówek (etykieta zakresu)",
       "default": "Wybierz zakres ochrony"
+    },
+    {
+      "type": "text",
+      "id": "social_proof_text",
+      "label": "Linia social proof",
+      "default": "Najczęściej wybierany: Pakiet 2"
     },
     {
       "type": "text",
@@ -287,10 +539,51 @@
       "default": "Sam element"
     },
     {
+      "type": "header",
+      "content": "Etykiety kafelków (fallback)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Najpierw używany jest metafield „oklejauto.badge” na produkcie pakietu. Gdy pusty — poniższe pola (wg kolejności pakietów na liście)."
+    },
+    {
       "type": "text",
-      "id": "savings_prefix",
-      "label": "Tekst przed kwotą oszczędności",
-      "default": "Oszczędzasz"
+      "id": "badge_1",
+      "label": "Etykieta pakietu 1"
+    },
+    {
+      "type": "text",
+      "id": "badge_2",
+      "label": "Etykieta pakietu 2",
+      "default": "Popularny"
+    },
+    {
+      "type": "text",
+      "id": "badge_3",
+      "label": "Etykieta pakietu 3",
+      "default": "Bestseller"
+    },
+    {
+      "type": "header",
+      "content": "Panel składu pakietu"
+    },
+    {
+      "type": "text",
+      "id": "label_includes",
+      "label": "Etykieta listy składu",
+      "default": "W zestawie"
+    },
+    {
+      "type": "text",
+      "id": "label_separate",
+      "label": "Etykieta sumy osobno",
+      "default": "Osobno"
+    },
+    {
+      "type": "text",
+      "id": "label_bundle",
+      "label": "Etykieta ceny w pakiecie",
+      "default": "W pakiecie"
     },
     {
       "type": "header",

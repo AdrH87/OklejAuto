@@ -15,20 +15,21 @@
           "type": "_product-media-gallery",
           "static": true,
           "settings": {
-            "media_presentation": "grid",
-            "media_columns": "two",
+            "media_presentation": "carousel",
+            "media_columns": "one",
             "image_gap": 1,
-            "large_first_image": true,
-            "icons_style": "none",
-            "slideshow_controls_style": "counter",
-            "slideshow_mobile_controls_style": "dots",
+            "large_first_image": false,
+            "icons_style": "arrow",
+            "slideshow_controls_style": "thumbnails",
+            "slideshow_mobile_controls_style": "thumbnails",
             "thumbnail_position": "bottom",
-            "thumbnail_width": 44,
+            "thumbnail_width": 64,
+            "thumbnail_radius": 8,
             "aspect_ratio": "1",
             "constrain_to_viewport": false,
             "media_fit": "cover",
-            "media_radius": 0,
-            "extend_media": true,
+            "media_radius": 12,
+            "extend_media": false,
             "zoom": true,
             "video_loop": false,
             "hide_variants": false,
@@ -44,12 +45,12 @@
           "static": true,
           "settings": {
             "width": "custom",
-            "custom_width": 90,
+            "custom_width": 92,
             "width_mobile": "fill",
             "custom_width_mobile": 100,
             "height": "fit",
             "details_position": "flex-start",
-            "gap": 12,
+            "gap": 10,
             "sticky_details_desktop": true,
             "inherit_color_scheme": true,
             "color_scheme": "",
@@ -60,12 +61,28 @@
             "border_width": 1,
             "border_opacity": 100,
             "border_radius": 0,
-            "padding-block-start": 16,
-            "padding-block-end": 36,
+            "padding-block-start": 12,
+            "padding-block-end": 28,
             "padding-inline-start": 12,
             "padding-inline-end": 12
           },
           "blocks": {
+            "oa_benefit_badges": {
+              "type": "oa-benefit-badges",
+              "settings": {
+                "icon_1": "recycle",
+                "label_1": "Samoregenerująca powłoka",
+                "icon_2": "eye",
+                "label_2": "Niewidoczna po montażu",
+                "icon_3": "check_box",
+                "label_3": "Gwarancja trwałości",
+                "padding-block-start": 0,
+                "padding-block-end": 2,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
             "text_tefwj7": {
               "type": "text",
               "name": "t:names.title",
@@ -103,22 +120,12 @@
               },
               "blocks": {}
             },
-            "price_a7krng": {
-              "type": "price",
+            "oa_usp_line": {
+              "type": "oa-usp-line",
               "settings": {
-                "show_sale_price_first": true,
-                "show_installments": false,
-                "show_tax_info": true,
-                "type_preset": "h4",
-                "width": "100%",
-                "alignment": "left",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "color": "var(--color-foreground)",
-                "padding-block-start": 4,
+                "icon": "ruler",
+                "text": "Docinana pod Twoje auto — montaż w kilka minut",
+                "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
@@ -129,11 +136,11 @@
               "type": "oa-selling-points",
               "settings": {
                 "icon_1": "recycle",
-                "label_1": "Samoregenerująca powłoka",
+                "label_1": "Samoregeneracja",
                 "icon_2": "eye",
-                "label_2": "Niewidoczna ochrona",
+                "label_2": "Niewidoczna",
                 "icon_3": "stopwatch",
-                "label_3": "Montaż samodzielny w kilka minut",
+                "label_3": "Montaż DIY",
                 "icon_4": "check_box",
                 "label_4": "Gwarancja trwałości",
                 "padding-block-start": 4,
@@ -162,84 +169,156 @@
                 "background": false,
                 "background_color": "#00000026",
                 "corner_radius": 0,
-                "padding-block-start": 8,
+                "padding-block-start": 4,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
               "blocks": {}
             },
-            "vehicle_marka": {
-              "type": "product-custom-property",
-              "name": "Pojazd — marka",
+            "group_vehicle_row_1": {
+              "type": "group",
+              "name": "Pojazd — rząd 1",
               "settings": {
-                "property_heading": "Marka",
-                "property_description": "",
-                "property_key": "Marka",
-                "input_type": "text",
-                "max_length": 40,
-                "required": true,
-                "placeholder": "np. BMW",
+                "content_direction": "row",
+                "vertical_on_mobile": false,
+                "horizontal_alignment": "flex-start",
+                "vertical_alignment": "flex-start",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "flex-start",
+                "vertical_alignment_flex_direction_column": "flex-start",
+                "gap": 8,
+                "width": "custom",
+                "custom_width": 100,
+                "width_mobile": "fill",
+                "custom_width_mobile": 100,
+                "height": "fit",
+                "inherit_color_scheme": true,
+                "color_scheme": "",
+                "background_media": "none",
+                "video_position": "cover",
+                "background_image_position": "cover",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {}
+              "blocks": {
+                "vehicle_marka": {
+                  "type": "product-custom-property",
+                  "name": "Pojazd — marka",
+                  "settings": {
+                    "property_heading": "Marka",
+                    "property_description": "",
+                    "property_key": "Marka",
+                    "input_type": "text",
+                    "max_length": 40,
+                    "required": true,
+                    "show_character_counter": false,
+                    "placeholder": "np. BMW",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
+                "vehicle_model": {
+                  "type": "product-custom-property",
+                  "name": "Pojazd — model",
+                  "settings": {
+                    "property_heading": "Model",
+                    "property_description": "",
+                    "property_key": "Model",
+                    "input_type": "text",
+                    "max_length": 40,
+                    "required": true,
+                    "show_character_counter": false,
+                    "placeholder": "np. Seria 3",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["vehicle_marka", "vehicle_model"]
             },
-            "vehicle_model": {
-              "type": "product-custom-property",
-              "name": "Pojazd — model",
+            "group_vehicle_row_2": {
+              "type": "group",
+              "name": "Pojazd — rząd 2",
               "settings": {
-                "property_heading": "Model",
-                "property_description": "",
-                "property_key": "Model",
-                "input_type": "text",
-                "max_length": 40,
-                "required": true,
-                "placeholder": "np. Seria 3",
+                "content_direction": "row",
+                "vertical_on_mobile": false,
+                "horizontal_alignment": "flex-start",
+                "vertical_alignment": "flex-start",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "flex-start",
+                "vertical_alignment_flex_direction_column": "flex-start",
+                "gap": 8,
+                "width": "custom",
+                "custom_width": 100,
+                "width_mobile": "fill",
+                "custom_width_mobile": 100,
+                "height": "fit",
+                "inherit_color_scheme": true,
+                "color_scheme": "",
+                "background_media": "none",
+                "video_position": "cover",
+                "background_image_position": "cover",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {}
-            },
-            "vehicle_rocznik": {
-              "type": "product-custom-property",
-              "name": "Pojazd — rocznik",
-              "settings": {
-                "property_heading": "Rocznik",
-                "property_description": "",
-                "property_key": "Rocznik",
-                "input_type": "text",
-                "max_length": 25,
-                "required": true,
-                "placeholder": "np. 2021",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
+              "blocks": {
+                "vehicle_rocznik": {
+                  "type": "product-custom-property",
+                  "name": "Pojazd — rocznik",
+                  "settings": {
+                    "property_heading": "Rocznik",
+                    "property_description": "",
+                    "property_key": "Rocznik",
+                    "input_type": "text",
+                    "max_length": 25,
+                    "required": true,
+                    "show_character_counter": false,
+                    "placeholder": "np. 2021",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
+                "vehicle_wersja": {
+                  "type": "product-custom-property",
+                  "name": "Pojazd — wersja",
+                  "settings": {
+                    "property_heading": "Wersja / nadwozie",
+                    "property_description": "",
+                    "property_key": "Wersja / nadwozie",
+                    "input_type": "text",
+                    "max_length": 45,
+                    "required": false,
+                    "show_character_counter": false,
+                    "placeholder": "np. M-pakiet, kombi, facelift",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
               },
-              "blocks": {}
-            },
-            "vehicle_wersja": {
-              "type": "product-custom-property",
-              "name": "Pojazd — wersja",
-              "settings": {
-                "property_heading": "Wersja / nadwozie",
-                "property_description": "Pomaga nam dociąć idealnie pod Twoje auto",
-                "property_key": "Wersja / nadwozie",
-                "input_type": "text",
-                "max_length": 45,
-                "required": false,
-                "placeholder": "np. M-pakiet, kombi, facelift",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
+              "block_order": ["vehicle_rocznik", "vehicle_wersja"]
             },
             "variant_picker_R3rGDr": {
               "type": "variant-picker",
@@ -258,12 +337,18 @@
               "type": "oa-bundle-tier-selector",
               "settings": {
                 "heading": "Wybierz zakres ochrony",
+                "social_proof_text": "Najczęściej wybierany: Pakiet 2",
                 "current_label": "Sam element",
-                "savings_prefix": "Oszczędzasz",
+                "badge_1": "",
+                "badge_2": "Popularny",
+                "badge_3": "Bestseller",
+                "label_includes": "W zestawie",
+                "label_separate": "Osobno",
+                "label_bundle": "W pakiecie",
                 "vehicle_keys": "Marka,Model,Rocznik,Wersja / nadwozie",
                 "attribute_key": "vehicle",
-                "padding-block-start": 8,
-                "padding-block-end": 4,
+                "padding-block-start": 4,
+                "padding-block-end": 2,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
@@ -275,7 +360,7 @@
                 "stacking": false,
                 "show_pickup_availability": false,
                 "gift_card_form": true,
-                "padding-block-start": 0,
+                "padding-block-start": 2,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
@@ -284,6 +369,7 @@
                 "quantity": {
                   "type": "quantity",
                   "static": true,
+                  "disabled": true,
                   "settings": {},
                   "blocks": {}
                 },
@@ -305,44 +391,6 @@
               },
               "block_order": []
             },
-            "oa_payment_icons": {
-              "type": "payment-icons",
-              "settings": {
-                "horizontal_alignment": "flex-start",
-                "gap": 8,
-                "padding-block-start": 8,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "text_trust_line": {
-              "type": "text",
-              "name": "Linia zaufania",
-              "settings": {
-                "text": "<p>Bezpieczne płatności • Szyfrowane połączenie SSL</p>",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "paragraph",
-                "font": "var(--font-primary--family)",
-                "font_size": "",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "color": "",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
             "text_delivery": {
               "type": "text",
               "name": "Informacje o dostawie",
@@ -362,33 +410,20 @@
                 "background": false,
                 "background_color": "#00000026",
                 "corner_radius": 0,
-                "padding-block-start": 4,
-                "padding-block-end": 4,
+                "padding-block-start": 2,
+                "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
               "blocks": {}
             },
-            "text_gXMUag": {
-              "type": "text",
-              "name": "Product description",
+            "oa_trust_block": {
+              "type": "oa-trust-block",
               "settings": {
-                "text": "{{ closest.product.description }}",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "rte",
-                "font": "var(--font-primary--family)",
-                "font_size": "",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "color": "",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
+                "icon": "return",
+                "heading": "Przetestuj 30 dni bez ryzyka",
+                "text": "Nie pasuje? Odeślij folię w ciągu 30 dni, a zwrócimy Ci pełną kwotę. Bez pytań.",
+                "padding-block-start": 2,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
@@ -414,7 +449,7 @@
                 "background": false,
                 "background_color": "#00000026",
                 "corner_radius": 0,
-                "padding-block-start": 12,
+                "padding-block-start": 8,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
@@ -440,6 +475,26 @@
                 "padding-inline-end": 0
               },
               "blocks": {
+                "faq_row_opis": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Opis produktu",
+                    "open_by_default": false,
+                    "icon": "none",
+                    "width": 20
+                  },
+                  "blocks": {
+                    "faq_answer_opis": {
+                      "type": "text",
+                      "settings": {
+                        "text": "{{ closest.product.description }}",
+                        "width": "100%"
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["faq_answer_opis"]
+                },
                 "faq_row_1": {
                   "type": "_accordion-row",
                   "settings": {
@@ -521,26 +576,23 @@
                   "block_order": ["faq_answer_4"]
                 }
               },
-              "block_order": ["faq_row_1", "faq_row_2", "faq_row_3", "faq_row_4"]
+              "block_order": ["faq_row_opis", "faq_row_1", "faq_row_2", "faq_row_3", "faq_row_4"]
             }
           },
           "block_order": [
+            "oa_benefit_badges",
             "text_tefwj7",
             "reviews",
-            "price_a7krng",
+            "oa_usp_line",
             "oa_selling_points",
             "text_vehicle_heading",
-            "vehicle_marka",
-            "vehicle_model",
-            "vehicle_rocznik",
-            "vehicle_wersja",
+            "group_vehicle_row_1",
+            "group_vehicle_row_2",
             "variant_picker_R3rGDr",
             "oa_tier_selector",
             "buy_buttons_eYQEYi",
-            "oa_payment_icons",
-            "text_trust_line",
             "text_delivery",
-            "text_gXMUag",
+            "oa_trust_block",
             "text_faq_heading",
             "oa_faq"
           ]
@@ -549,9 +601,9 @@
       "settings": {
         "content_width": "content-center-aligned",
         "desktop_media_position": "left",
-        "equal_columns": false,
+        "equal_columns": true,
         "limit_details_width": false,
-        "gap": 8,
+        "gap": 16,
         "enable_sticky_add_to_cart": false,
         "color_scheme": "scheme-1",
         "padding-block-start": 0,

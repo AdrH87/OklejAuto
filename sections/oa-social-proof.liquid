@@ -1,8 +1,11 @@
 {% liquid
   assign has_photos = false
+  assign has_logos = false
   for block in section.blocks
     if block.type == 'photo'
       assign has_photos = true
+    elsif block.type == 'logo'
+      assign has_logos = true
     endif
   endfor
 %}
@@ -26,26 +29,67 @@
         <p class="oa-social__description oa-muted">{{ section.settings.description }}</p>
       {%- endif -%}
 
-      <div class="oa-social__stats">
-        {%- if section.settings.stat_1_value != blank -%}
-          <span class="oa-pill oa-social__stat">
-            <strong>{{ section.settings.stat_1_value }}</strong>
-            <span class="oa-muted">{{ section.settings.stat_1_label }}</span>
-          </span>
-        {%- endif -%}
-        {%- if section.settings.stat_2_value != blank -%}
-          <span class="oa-pill oa-social__stat">
-            <strong>{{ section.settings.stat_2_value }}</strong>
-            <span class="oa-muted">{{ section.settings.stat_2_label }}</span>
-          </span>
-        {%- endif -%}
-        {%- if section.settings.stat_3_value != blank -%}
-          <span class="oa-pill oa-social__stat">
-            <strong>{{ section.settings.stat_3_value }}</strong>
-            <span class="oa-muted">{{ section.settings.stat_3_label }}</span>
-          </span>
-        {%- endif -%}
-      </div>
+      {%- if has_logos -%}
+        <div class="oa-social__marquee-wrap">
+          {%- if section.settings.logos_label != blank -%}
+            <p class="oa-social__marquee-label oa-muted">{{ section.settings.logos_label }}</p>
+          {%- endif -%}
+
+          {%- comment -%}
+            Seamless loop: the logo set is rendered twice in Liquid (no JS
+            innerHTML doubling — zero CLS, no duplicate content for crawlers).
+            The second set is aria-hidden and skipped by the editor
+            (no shopify_attributes). translateX(-50%) over the doubled track
+            lands exactly on frame one.
+          {%- endcomment -%}
+          <div class="oa-social__marquee" style="--oa-marquee-duration: {{ section.settings.marquee_speed | default: 38 }}s">
+            <div class="oa-social__marquee-track">
+              <div class="oa-social__marquee-set">
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'logo' -%}
+                    <span class="oa-social__logo" {{ block.shopify_attributes }}>
+                      {%- if block.settings.image != blank -%}
+                        {{
+                          block.settings.image
+                          | image_url: width: 360
+                          | image_tag:
+                            widths: '180, 360',
+                            loading: 'lazy',
+                            alt: block.settings.name,
+                            class: 'oa-social__logo-img'
+                        }}
+                      {%- elsif block.settings.name != blank -%}
+                        <span class="oa-social__logo-text">{{ block.settings.name }}</span>
+                      {%- endif -%}
+                    </span>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+              <div class="oa-social__marquee-set" aria-hidden="true">
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'logo' -%}
+                    <span class="oa-social__logo">
+                      {%- if block.settings.image != blank -%}
+                        {{
+                          block.settings.image
+                          | image_url: width: 360
+                          | image_tag:
+                            widths: '180, 360',
+                            loading: 'lazy',
+                            alt: '',
+                            class: 'oa-social__logo-img'
+                        }}
+                      {%- elsif block.settings.name != blank -%}
+                        <span class="oa-social__logo-text">{{ block.settings.name }}</span>
+                      {%- endif -%}
+                    </span>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
     </div>
 
     <div class="oa-social__reviews" role="list">
@@ -145,20 +189,101 @@
     line-height: 1.55;
   }
 
-  .oa-social__stats {
+  /* Logo marquee — seamless strip (pattern: Videografia "Zaufali nam") */
+  .oa-social__marquee-wrap {
+    width: 100%;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 10px;
     margin-block-start: 8px;
   }
 
-  .oa-social__stat {
-    min-height: 44px;
-    padding-block: 0.5em;
+  .oa-social__marquee-label {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .oa-social__stat strong {
-    font-weight: 600;
+  .oa-social__marquee {
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10%, #000 90%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 10%, #000 90%, transparent 100%);
+  }
+
+  .oa-social__marquee-track {
+    display: flex;
+    width: max-content;
+    animation: oa-social-marquee var(--oa-marquee-duration, 38s) linear infinite;
+  }
+
+  .oa-social__marquee:hover .oa-social__marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes oa-social-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .oa-social__marquee-set {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .oa-social__logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-inline-end: 44px;
+    white-space: nowrap;
+  }
+
+  .oa-social__logo-img {
+    display: block;
+    width: auto;
+    height: 26px;
+    opacity: 0.8;
+  }
+
+  .oa-social__logo-text {
+    color: rgb(255 255 255 / 0.7);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Reduced motion: static, wrapping row — duplicate set hidden */
+  @media (prefers-reduced-motion: reduce) {
+    .oa-social__marquee {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
+    .oa-social__marquee-track {
+      animation: none;
+      width: 100%;
+    }
+
+    /* Allow the set to shrink to the container so wrapping engages */
+    .oa-social__marquee-set {
+      flex: 1 1 auto;
+      min-width: 0;
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+
+    .oa-social__marquee-set[aria-hidden='true'] {
+      display: none;
+    }
   }
 
   /* Reviews — horizontal snap carousel on mobile, column on desktop */
@@ -331,43 +456,23 @@
     },
     {
       "type": "header",
-      "content": "Statystyki"
+      "content": "Pasek logotypów"
     },
     {
       "type": "text",
-      "id": "stat_1_value",
-      "label": "Statystyka 1 — wartość",
-      "default": "10 lat"
+      "id": "logos_label",
+      "label": "Etykieta nad logotypami",
+      "default": "Zaufane marki folii"
     },
     {
-      "type": "text",
-      "id": "stat_1_label",
-      "label": "Statystyka 1 — opis",
-      "default": "doświadczenia"
-    },
-    {
-      "type": "text",
-      "id": "stat_2_value",
-      "label": "Statystyka 2 — wartość",
-      "default": "1000+"
-    },
-    {
-      "type": "text",
-      "id": "stat_2_label",
-      "label": "Statystyka 2 — opis",
-      "default": "oklejonych aut"
-    },
-    {
-      "type": "text",
-      "id": "stat_3_value",
-      "label": "Statystyka 3 — wartość",
-      "default": "200+"
-    },
-    {
-      "type": "text",
-      "id": "stat_3_label",
-      "label": "Statystyka 3 — opis",
-      "default": "opinii klientów"
+      "type": "range",
+      "id": "marquee_speed",
+      "label": "Czas pełnego obiegu",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "s",
+      "default": 38
     },
     {
       "type": "header",
@@ -439,6 +544,25 @@
           "label": "Zdjęcie"
         }
       ]
+    },
+    {
+      "type": "logo",
+      "name": "Logo marki",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo (obraz)",
+          "info": "Najlepiej poziome logo na przezroczystym tle. Gdy puste, wyświetlana jest nazwa jako tekst."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Nazwa marki",
+          "info": "Tekst zastępczy, gdy brak obrazu — oraz opis alternatywny logo.",
+          "default": "XPEL"
+        }
+      ]
     }
   ],
   "presets": [
@@ -446,6 +570,36 @@
       "name": "OA — Dowód społeczny",
       "category": "OklejAuto",
       "blocks": [
+        {
+          "type": "logo",
+          "settings": {
+            "name": "DETAIL STUDIO"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "name": "XPEL"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "name": "3M"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "name": "LLumar"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "name": "SunTek"
+          }
+        },
         {
           "type": "review",
           "settings": {

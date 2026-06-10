@@ -27,19 +27,37 @@
 
   {%- if section.blocks.size > 0 -%}
     <div class="oa-pain__grid">
+      {%- liquid
+        assign pain_card_count = 0
+      -%}
       {%- for block in section.blocks -%}
         {%- if block.type == 'pain_card' -%}
-          <div class="oa-pain__card" {{ block.shopify_attributes }}>
+          {%- liquid
+            assign pain_card_count = pain_card_count | plus: 1
+            # First card = feature: 2×2 in the desktop mosaic, larger image + type
+            if pain_card_count == 1
+              assign card_class = 'oa-pain__card oa-pain__card--feature'
+              assign card_sizes = '(min-width: 990px) 66vw, (min-width: 750px) 33vw, 50vw'
+              assign card_width = 1400
+              assign card_widths = '450, 600, 900, 1400'
+            else
+              assign card_class = 'oa-pain__card'
+              assign card_sizes = '(min-width: 750px) 33vw, 50vw'
+              assign card_width = 900
+              assign card_widths = '450, 600, 900'
+            endif
+          -%}
+          <div class="{{ card_class }}" {{ block.shopify_attributes }}>
             <div class="oa-pain__card-media">
               {%- if block.settings.image != blank -%}
                 {{
                   block.settings.image
-                  | image_url: width: 900
+                  | image_url: width: card_width
                   | image_tag:
                     width: block.settings.image.width,
                     height: block.settings.image.height,
-                    widths: '450, 600, 900',
-                    sizes: '(min-width: 750px) 33vw, 50vw',
+                    widths: card_widths,
+                    sizes: card_sizes,
                     loading: 'lazy',
                     alt: block.settings.image.alt,
                     class: 'oa-pain__card-img'
@@ -270,6 +288,49 @@
       margin-block-start: 40px;
     }
   }
+
+  /*
+   * Editorial mosaic (desktop): first card spans 2×2, the rest auto-flow
+   * densely around it. With the default 6 cards the map is:
+   *   [ feature feature small-1 ]
+   *   [ feature feature small-2 ]
+   *   [ small-3 small-4 small-5 ]
+   * Span + dense flow (instead of hardcoded grid-template-areas) keeps any
+   * block count graceful — 4, 5 or 7 cards still pack without holes up front.
+   */
+  @media screen and (min-width: 990px) {
+    .oa-pain__grid {
+      grid-auto-flow: dense;
+      grid-auto-rows: 1fr;
+    }
+
+    .oa-pain__card--feature {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    /* Feature media fills the 2×2 cell instead of keeping 4:3 —
+       the card height is set by the neighbouring rows */
+    .oa-pain__card--feature .oa-pain__card-media {
+      aspect-ratio: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .oa-pain__card--feature .oa-pain__card-body {
+      gap: 8px;
+      padding: 20px 22px 24px;
+    }
+
+    .oa-pain__card--feature .oa-pain__card-label {
+      font-size: 1.375rem;
+    }
+
+    .oa-pain__card--feature .oa-pain__card-description {
+      font-size: 0.9375rem;
+      max-width: 52ch;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -400,15 +461,15 @@
         {
           "type": "pain_card",
           "settings": {
-            "label": "Wnęki klamek",
-            "description": "Paznokcie i kluczyki zostawiają rysy już po kilku tygodniach."
+            "label": "Progi drzwi",
+            "description": "Buty i żwir ścierają lakier przy każdym wsiadaniu."
           }
         },
         {
           "type": "pain_card",
           "settings": {
-            "label": "Progi drzwi",
-            "description": "Buty i żwir ścierają lakier przy każdym wsiadaniu."
+            "label": "Wnęki klamek",
+            "description": "Paznokcie i kluczyki zostawiają rysy już po kilku tygodniach."
           }
         },
         {
