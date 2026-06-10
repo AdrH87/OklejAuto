@@ -1,41 +1,34 @@
 
 
 {%- doc -%}
-  OklejAuto bundle tier selector (TryScent PDP pattern).
+  OklejAuto bundle tier selector — "choose-your-own" model (v2).
 
-  Renders a horizontal row of radio tap-tiles: tile 1 is the current element
-  product on its own, tiles 2+ are "Pakiet" bundle products referenced by the
-  product metafield `oklejauto.pakiety` (type: list.product_reference).
+  Three radio tap-tiles: "1 element" (the current element product, native
+  form flow), "2 elementy −X%" and "4 elementy −Y%". The bundle tiers open
+  a single fold-out panel (grid-rows 0fr -> 1fr) with checkbox chips — one
+  per product of the configured collection (default: "elementy") — where the
+  shopper picks EXACTLY 2 or 4 elements. The current product is pre-checked
+  (and prepended as the first chip when it's not part of the collection).
 
-  Each pakiet tile can carry a marketing flag ("Popularny" / "Bestseller"):
-  metafield-first (`oklejauto.badge`, single_line_text on the pakiet product),
-  falling back to the block's badge_1..badge_3 settings (matched by the
-  pakiet's position in the `oklejauto.pakiety` list).
+  Pricing: the panel summary, the main price block and the ATC button label
+  show sum(checked chips) × (1 − tier%) — computed live in JS from the
+  chips' data-price (cents) and formatted with the theme's money-formatting
+  module (shop.money_format + ISO currency ride in as data attributes).
+  The actual discount is applied in the cart by Shopify automatic discounts
+  (min 2 / min 4 items from the collection) — the PDP only previews it,
+  so the X/Y settings here MUST match the discounts configured in admin.
 
-  Below the tiles, one fold-open value-stack panel per pakiet is PRE-RENDERED
-  server-side (hidden, grid-template-rows 0fr) from the pakiet's
-  `oklejauto.sklad` metafield (list.product_reference): each component
-  product's title + live price, then "Osobno: [suma]" (crossed out) and
-  "W pakiecie: [cena] (−X%)" — all from real prices, no manual copy.
-  No sklad metafield -> the panel gracefully shows just the savings line
-  (compare_at_price as the "Osobno" reference). JS only toggles which panel
-  is open — there are no fetches.
+  Add to cart: tier 1 uses the theme's native single-product flow untouched.
+  Bundle tiers intercept the form submit and POST /cart/add.js with items[]
+  (one line per chip, quantity 1, vehicle properties on every line), then
+  fire the exact same events the theme's product form fires after an add.
 
-  Savings convention: the client sets each pakiet's compare_at_price to the
-  sum of its element prices.
+  The old `oklejauto.pakiety` / `oklejauto.sklad` metafields are no longer
+  read — predefined Pakiet products are retired.
 
-  Selecting a pakiet tile swaps the variant id submitted by the section's
-  product form (hidden input[name="id"]), so the vehicle line-item properties
-  ride along no matter which product is added. Tile 1 ("Sam element") never
-  bakes a variant id — it hands control back to the theme's native variant
-  flow (variant-picker + product-form own the input and the price display).
-  The add-to-cart button label carries the active tier's price
-  (crossed-out compare_at + current), server-rendered per tier in
-  <template data-button-price-for> fragments so the JS never formats money.
-  Logic: assets/oa-bundle-tier-selector.js
-
-  Graceful degradation: metafield empty/missing -> the block renders nothing
-  (a setup hint is shown in the theme editor only) and the plain ATC works.
+  Graceful degradation: fewer than 2 chips available -> the block renders
+  nothing (a setup hint is shown in the theme editor only) and the plain
+  ATC works. Logic: assets/oa-bundle-tier-selector.js
 {%- enddoc -%}
 
 {%- liquid
@@ -46,16 +39,43 @@
   endif
 
   assign current_variant = product.selected_or_first_available_variant
-  assign pakiety = product.metafields.oklejauto.pakiety.value
   assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id
   assign radio_group_name = 'oa-tier-' | append: block.id
 
-  assign label_includes = block_settings.label_includes | default: 'W zestawie'
+  assign chips_collection = block_settings.collection
+  if chips_collection == blank
+    assign chips_collection = collections['elementy']
+  endif
+
+  assign discount_pct_2 = block_settings.discount_pct_2 | default: 10
+  assign discount_pct_4 = block_settings.discount_pct_4 | default: 20
+
+  assign label_tier_1 = block_settings.label_tier_1 | default: '1 element'
+  assign label_tier_2 = block_settings.label_tier_2 | default: '2 elementy'
+  assign label_tier_3 = block_settings.label_tier_3 | default: '4 elementy'
   assign label_separate = block_settings.label_separate | default: 'Osobno'
-  assign label_bundle = block_settings.label_bundle | default: 'W pakiecie'
+  assign label_with_discount = block_settings.label_with_discount | default: 'Z rabatem'
+  assign label_counter = block_settings.label_counter | default: 'Wybrano'
+
+  assign current_in_collection = false
+  assign chip_count = 0
+  for chip_product in chips_collection.products
+    assign chip_count = chip_count | plus: 1
+    if chip_product.id == product.id
+      assign current_in_collection = true
+    endif
+  endfor
+  if current_in_collection == false and product != blank
+    assign chip_count = chip_count | plus: 1
+  endif
+
+  assign initial_checked = 0
+  if current_variant.available
+    assign initial_checked = 1
+  endif
 -%}
 
-{%- if product != blank and pakiety != blank -%}
+{%- if product != blank and chip_count >= 2 -%}
   <oa-bundle-tier-selector
     class="oa-tier-selector spacing-style"
     style="{% render 'spacing-style', settings: block_settings %}"
@@ -64,6 +84,9 @@
     data-product-form-id="{{ product_form_id }}"
     data-vehicle-keys="{{ block_settings.vehicle_keys | escape }}"
     data-attribute-key="{{ block_settings.attribute_key | default: 'vehicle' | escape }}"
+    data-money-format="{{ shop.money_format | strip_html | escape }}"
+    data-currency="{{ localization.country.currency.iso_code }}"
+    data-error-text="Nie udało się dodać do koszyka. Spróbuj ponownie."
     {{ block.shopify_attributes }}
   >
     {%- if block_settings.heading != blank -%}
@@ -90,143 +113,198 @@
     >
       <label class="oa-tier oa-glass">
         {%- comment -%}
-          No value attribute on purpose: tile 1 does not own a variant id.
-          The JS restores the theme-maintained variant id when it's selected.
+          Tier 1 owns nothing: the theme's native variant flow keeps the
+          form's hidden input and the price display at all times.
         {%- endcomment -%}
         <input
           type="radio"
           class="oa-tier__input visually-hidden"
           name="{{ radio_group_name }}"
-          data-tier="current"
+          data-tier="single"
           checked
           on:change="/handleTierChange"
         >
-        <span class="oa-tier__name">{{ block_settings.current_label | escape }}</span>
+        <span class="oa-tier__name">{{ label_tier_1 | escape }}</span>
         <span class="oa-tier__price" data-tier-price="current">{{ current_variant.price | money }}</span>
       </label>
 
-      {%- for pakiet in pakiety -%}
-        {%- liquid
-          assign pakiet_variant = pakiet.selected_or_first_available_variant
-          if pakiet_variant == blank
-            continue
-          endif
+      {%- assign tier_2_disabled = false -%}
+      {%- if chip_count < 2 -%}{%- assign tier_2_disabled = true -%}{%- endif -%}
+      <label class="oa-tier oa-glass{% if tier_2_disabled %} oa-tier--unavailable{% endif %}">
+        <input
+          type="radio"
+          class="oa-tier__input visually-hidden"
+          name="{{ radio_group_name }}"
+          data-tier="bundle"
+          data-required="2"
+          data-discount-pct="{{ discount_pct_2 }}"
+          {% if tier_2_disabled %}
+            disabled
+          {% endif %}
+          on:change="/handleTierChange"
+        >
+        {%- if block_settings.badge_2 != blank and tier_2_disabled == false -%}
+          <span class="oa-tier__flag">{{ block_settings.badge_2 | escape }}</span>
+        {%- endif -%}
+        <span class="oa-tier__name">{{ label_tier_2 | escape }}</span>
+        {%- if discount_pct_2 > 0 -%}
+          <span class="oa-tier__discount">−{{ discount_pct_2 }}%</span>
+        {%- endif -%}
+      </label>
 
-          assign flag_text = pakiet.metafields.oklejauto.badge.value
-          if flag_text == blank
-            assign badge_key = 'badge_' | append: forloop.index
-            assign flag_text = block_settings[badge_key]
-          endif
-        -%}
-        <label class="oa-tier oa-glass{% unless pakiet_variant.available %} oa-tier--unavailable{% endunless %}">
-          <input
-            type="radio"
-            class="oa-tier__input visually-hidden"
-            name="{{ radio_group_name }}"
-            value="{{ pakiet_variant.id }}"
-            data-tier="pakiet"
-            {% unless pakiet_variant.available %}
-              disabled
-            {% endunless %}
-            on:change="/handleTierChange"
-          >
-          {%- if pakiet_variant.available == false -%}
-            <span class="oa-tier__flag oa-tier__flag--muted">Niedostępny</span>
-          {%- elsif flag_text != blank -%}
-            <span class="oa-tier__flag">{{ flag_text | escape }}</span>
-          {%- endif -%}
-          <span class="oa-tier__name">{{ pakiet.title | escape }}</span>
-          <span class="oa-tier__price">{{ pakiet_variant.price | money }}</span>
-        </label>
-      {%- endfor -%}
+      {%- assign tier_4_disabled = false -%}
+      {%- if chip_count < 4 -%}{%- assign tier_4_disabled = true -%}{%- endif -%}
+      <label class="oa-tier oa-glass{% if tier_4_disabled %} oa-tier--unavailable{% endif %}">
+        <input
+          type="radio"
+          class="oa-tier__input visually-hidden"
+          name="{{ radio_group_name }}"
+          data-tier="bundle"
+          data-required="4"
+          data-discount-pct="{{ discount_pct_4 }}"
+          {% if tier_4_disabled %}
+            disabled
+          {% endif %}
+          on:change="/handleTierChange"
+        >
+        {%- if block_settings.badge_3 != blank and tier_4_disabled == false -%}
+          <span class="oa-tier__flag">{{ block_settings.badge_3 | escape }}</span>
+        {%- endif -%}
+        <span class="oa-tier__name">{{ label_tier_3 | escape }}</span>
+        {%- if discount_pct_4 > 0 -%}
+          <span class="oa-tier__discount">−{{ discount_pct_4 }}%</span>
+        {%- endif -%}
+      </label>
     </div>
 
     {%- comment -%}
-      Fold-open value stacks: one pre-rendered panel per pakiet, keyed by
-      variant id. Collapsed by default; the JS opens the panel matching the
-      selected pakiet tile (and keeps it in sync across section morphs).
+      One shared fold-out panel for both bundle tiers — chip picks survive
+      switching 2 <-> 4. The JS toggles data-open and fills counter/sums.
     {%- endcomment -%}
-    {%- for pakiet in pakiety -%}
-      {%- liquid
-        assign pakiet_variant = pakiet.selected_or_first_available_variant
-        if pakiet_variant == blank
-          continue
-        endif
+    <div
+      class="oa-tier-panel"
+      data-tier-panel
+      aria-hidden="true"
+    >
+      <div class="oa-tier-panel__clip">
+        <div class="oa-tier-panel__card oa-glass">
+          <p
+            class="oa-tier-panel__counter"
+            aria-live="polite"
+          >
+            {{ label_counter | escape }} <span data-count>{{ initial_checked }}</span> z <span data-required-count>2</span>
+          </p>
 
-        assign sklad = pakiet.metafields.oklejauto.sklad.value
+          <div class="oa-chip-grid">
+            {%- unless current_in_collection -%}
+              <label class="oa-chip oa-glass{% unless current_variant.available %} oa-chip--unavailable{% endunless %}">
+                <input
+                  type="checkbox"
+                  class="oa-chip__input visually-hidden"
+                  data-chip
+                  data-variant-id="{{ current_variant.id }}"
+                  data-price="{{ current_variant.price }}"
+                  {% if current_variant.available %}
+                    checked
+                    data-current-checked="true"
+                  {% else %}
+                    data-current-checked="false"
+                    data-unavailable="true"
+                    disabled
+                  {% endif %}
+                  on:change="/handleChipChange"
+                >
+                <span class="oa-chip__check" aria-hidden="true">{{ 'icon-checkmark.svg' | inline_asset_content }}</span>
+                <span class="oa-chip__body">
+                  <span class="oa-chip__name">{{ product.title | split: ' — ' | first | escape }}</span>
+                  <span class="oa-chip__price oa-muted">
+                    {%- if current_variant.available -%}
+                      {{- current_variant.price | money -}}
+                    {%- else -%}
+                      Niedostępny
+                    {%- endif -%}
+                  </span>
+                </span>
+              </label>
+            {%- endunless -%}
 
-        assign osobno = 0
-        if sklad != blank
-          for component in sklad
-            if component != blank
-              assign osobno = osobno | plus: component.price
-            endif
-          endfor
-        endif
-        if osobno == 0 and pakiet_variant.compare_at_price > pakiet_variant.price
-          assign osobno = pakiet_variant.compare_at_price
-        endif
+            {%- for chip_product in chips_collection.products -%}
+              {%- liquid
+                if chip_product.id == product.id
+                  assign chip_variant = current_variant
+                else
+                  assign chip_variant = chip_product.selected_or_first_available_variant
+                endif
+                if chip_variant == blank
+                  continue
+                endif
+                assign chip_is_current = false
+                if chip_product.id == product.id
+                  assign chip_is_current = true
+                endif
+              -%}
+              <label class="oa-chip oa-glass{% unless chip_variant.available %} oa-chip--unavailable{% endunless %}">
+                <input
+                  type="checkbox"
+                  class="oa-chip__input visually-hidden"
+                  data-chip
+                  data-variant-id="{{ chip_variant.id }}"
+                  data-price="{{ chip_variant.price }}"
+                  {% if chip_is_current and chip_variant.available %}
+                    checked
+                    data-current-checked="true"
+                  {% else %}
+                    data-current-checked="false"
+                  {% endif %}
+                  {% unless chip_variant.available %}
+                    data-unavailable="true"
+                    disabled
+                  {% endunless %}
+                  on:change="/handleChipChange"
+                >
+                <span class="oa-chip__check" aria-hidden="true">{{ 'icon-checkmark.svg' | inline_asset_content }}</span>
+                <span class="oa-chip__body">
+                  <span class="oa-chip__name">{{ chip_product.title | split: ' — ' | first | escape }}</span>
+                  <span class="oa-chip__price oa-muted">
+                    {%- if chip_variant.available -%}
+                      {{- chip_variant.price | money -}}
+                    {%- else -%}
+                      Niedostępny
+                    {%- endif -%}
+                  </span>
+                </span>
+              </label>
+            {%- endfor -%}
+          </div>
 
-        assign savings_pct = 0
-        if osobno > pakiet_variant.price
-          assign savings_pct = osobno | minus: pakiet_variant.price | times: 100.0 | divided_by: osobno | round
-        endif
-      -%}
-      <div
-        class="oa-tier-panel"
-        data-tier-panel
-        data-variant-id="{{ pakiet_variant.id }}"
-        aria-hidden="true"
-      >
-        <div class="oa-tier-panel__clip">
-          <div class="oa-tier-panel__card oa-glass">
-            {%- if sklad != blank -%}
-              <p class="oa-tier-panel__heading">{{ label_includes | escape }} — {{ pakiet.title | escape }}:</p>
-              <ul
-                class="oa-tier-panel__list"
-                role="list"
-              >
-                {%- for component in sklad -%}
-                  {%- if component != blank -%}
-                    <li class="oa-tier-panel__row">
-                      <span class="oa-tier-panel__component">{{ component.title | escape }}</span>
-                      <span class="oa-tier-panel__component-price oa-muted">{{ component.price | money }}</span>
-                    </li>
-                  {%- endif -%}
-                {%- endfor -%}
-              </ul>
-            {%- endif -%}
-            <div class="oa-tier-panel__totals">
-              {%- if osobno > pakiet_variant.price -%}
-                <p class="oa-tier-panel__separate oa-muted">
-                  {{ label_separate | escape }}: <s>{{ osobno | money }}</s>
-                </p>
-                <p class="oa-tier-panel__bundle">
-                  {{ label_bundle | escape }}: <strong>{{ pakiet_variant.price | money }}</strong>
-                  {%- if savings_pct > 0 %}
-                    <span class="oa-tier-panel__pct">(−{{ savings_pct }}%)</span>
-                  {%- endif -%}
-                </p>
-              {%- else -%}
-                <p class="oa-tier-panel__bundle">
-                  {{ label_bundle | escape }}: <strong>{{ pakiet_variant.price | money }}</strong>
-                </p>
-              {%- endif -%}
-            </div>
+          <div class="oa-tier-panel__totals">
+            <p
+              class="oa-tier-panel__separate oa-muted"
+              data-line-separate
+            >
+              <span aria-hidden="true">{{ label_separate | escape }}: <s data-sum-separate></s></span>
+              <span class="visually-hidden">{{ label_separate | escape }}: <span data-sum-separate-sr></span></span>
+            </p>
+            <p class="oa-tier-panel__bundle">
+              {{ label_with_discount | escape }}
+              <span class="oa-tier-panel__pct" data-discount-pct-text>−{{ discount_pct_2 }}%</span>:
+              <strong data-sum-discounted></strong>
+            </p>
           </div>
         </div>
       </div>
-    {%- endfor -%}
+    </div>
 
     {%- comment -%}
-      Server-rendered swap fragments, keyed by variant id.
+      Price fragments.
 
-      1. data-variant-id: full price markup per pakiet. The JS clones only the
-         CHILDREN of the snippet's [ref="priceContainer"] wrapper into the
-         live price container — the DOM must never hold two priceContainer refs.
-      2. data-button-price-for: compact price fragment appended to the
-         add-to-cart button label ("current" = the element product itself).
-         Money is always formatted here, server-side — never in JS.
+      1. data-button-price-for="current": server-rendered ATC label price for
+         tier 1, refreshed from section renders on variant:update (v1 pattern).
+      2. data-bundle-atc-price: skeleton for the computed bundle ATC label —
+         amounts are filled in JS (formatMoney), structure stays Liquid-owned.
+      3. data-bundle-price: skeleton copied as CHILDREN into the live
+         [ref="priceContainer"] — it must never contain its own
+         ref="priceContainer" (one live ref in the DOM at all times).
     {%- endcomment -%}
     <template data-button-price-for="current">
       <span class="oa-atc-price">
@@ -240,29 +318,29 @@
         <span class="oa-atc-price__amount"><span class="visually-hidden">Cena:&nbsp;</span>{{ current_variant.price | money }}</span>
       </span>
     </template>
-    {%- for pakiet in pakiety -%}
-      {%- liquid
-        assign pakiet_variant = pakiet.selected_or_first_available_variant
-        if pakiet_variant == blank
-          continue
-        endif
-      -%}
-      <template data-variant-id="{{ pakiet_variant.id }}">
-        {%- render 'price', product_resource: pakiet, show_sale_price_first: true -%}
-      </template>
-      <template data-button-price-for="{{ pakiet_variant.id }}">
-        <span class="oa-atc-price">
-          <span aria-hidden="true">—</span>
-          {%- if pakiet_variant.compare_at_price > pakiet_variant.price -%}
-            <s
-              class="oa-atc-price__compare"
-              aria-hidden="true"
-            >{{ pakiet_variant.compare_at_price | money }}</s>
-          {%- endif %}
-          <span class="oa-atc-price__amount"><span class="visually-hidden">Cena:&nbsp;</span>{{ pakiet_variant.price | money }}</span>
+    <template data-bundle-atc-price>
+      <span class="oa-atc-price">
+        <span aria-hidden="true">—</span>
+        <s
+          class="oa-atc-price__compare"
+          aria-hidden="true"
+          data-bundle-compare
+        ></s>
+        <span class="oa-atc-price__amount"><span class="visually-hidden">Cena:&nbsp;</span><span data-bundle-total></span></span>
+      </span>
+    </template>
+    <template data-bundle-price>
+      <div class="price__sale">
+        <span class="price-item__group">
+          <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+          <span class="price-item--sale price" data-bundle-total></span>
         </span>
-      </template>
-    {%- endfor -%}
+        <span class="price-item__group" data-bundle-compare-group>
+          <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+          <span class="price-item--regular compare-at-price" data-bundle-compare></span>
+        </span>
+      </div>
+    </template>
   </oa-bundle-tier-selector>
 
   <script
@@ -275,7 +353,7 @@
     class="oa-tier-selector__editor-hint oa-muted"
     {{ block.shopify_attributes }}
   >
-    Selektor pakietów: dodaj do produktu metafield „oklejauto.pakiety” (lista produktów), aby pokazać kafelki pakietów. Skład panelu rozwijanego: metafield „oklejauto.sklad” (lista produktów) NA produkcie pakietu. Bez metafielda blok nie renderuje niczego, a zwykły przycisk „Dodaj do koszyka” działa normalnie.
+    Selektor pakietów: wybierz kolekcję elementów (domyślnie „elementy”) z co najmniej 2 dostępnymi produktami, aby pokazać kafelki 1 / 2 / 4. Pamiętaj o automatic discounts w adminie (min. 2 szt → rabat 2 elementów, min. 4 szt → rabat 4 elementów). Bez kolekcji blok nie renderuje niczego, a zwykły przycisk „Dodaj do koszyka” działa normalnie.
   </div>
 {%- endif -%}
 
@@ -299,24 +377,14 @@
     line-height: 1.35;
   }
 
-  /* Horizontal tile row: as many equal columns as fit (3-up for the typical
-     element + 2 pakiety case). Tracks never shrink below 92px, extra tiles
-     wrap to a new row — no horizontal scroll, no cropping. */
+  /* Three fixed columns at every width: tier labels are short ("2 elementy"),
+     so three ~100px tiles fit a 375px viewport without wrapping rows. */
   .oa-tier-selector__group {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--gap-xs);
     padding-block-start: 10px; /* room for the overlapping flags */
     margin-block-start: var(--gap-xs);
-  }
-
-  /* Narrow phones: fixed 2-col grid — 4 tiles read as a tidy 2x2 instead of
-     an uneven 3+1 wrap; tiles get wider, names wrap less */
-  @media screen and (max-width: 479px) {
-    .oa-tier-selector__group {
-      grid-template-columns: repeat(2, 1fr);
-      row-gap: 14px; /* room for flags overlapping the second row */
-    }
   }
 
   .oa-tier {
@@ -383,12 +451,6 @@
     }
   }
 
-  .oa-tier__flag--muted {
-    background: var(--oa-surface-card);
-    border: 1px solid var(--oa-border-glass);
-    color: var(--oa-text-muted);
-  }
-
   .oa-tier__name {
     font-size: 0.8125rem;
     font-weight: var(--font-weight-semibold, 600);
@@ -408,8 +470,16 @@
     color: var(--color-foreground);
   }
 
-  /* Fold-open value stack: grid-rows 0fr -> 1fr keyed off data-open,
-     toggled by the component JS when a pakiet tile is selected. */
+  /* Discount line on bundle tiles — gold, sparingly */
+  .oa-tier__discount {
+    font-size: 0.8125rem;
+    line-height: 1.25;
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--oa-accent);
+  }
+
+  /* Fold-open panel: grid-rows 0fr -> 1fr keyed off data-open,
+     toggled by the component JS when a bundle tile is selected. */
   .oa-tier-panel {
     display: grid;
     grid-template-rows: 0fr;
@@ -432,51 +502,106 @@
 
   .oa-tier-panel__card {
     margin-block-start: var(--gap-sm);
-    padding: var(--padding-md) var(--padding-lg);
+    padding: var(--padding-md) var(--padding-md);
   }
 
-  .oa-tier-panel__heading {
-    margin: 0 0 var(--padding-2xs);
+  .oa-tier-panel__counter {
+    margin: 0 0 var(--padding-sm);
     font-size: 0.8125rem;
     font-weight: var(--font-weight-semibold, 600);
   }
 
-  .oa-tier-panel__list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  /* Element chips: 2-up on a 375px viewport, fluid above */
+  .oa-chip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--gap-xs);
+  }
+
+  .oa-chip {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    min-height: 48px; /* touch target */
+    min-width: 0;
+    padding: var(--padding-2xs) var(--padding-xs);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .oa-chip:hover {
+    border-color: rgb(255 255 255 / 0.3);
+  }
+
+  .oa-chip:has(.oa-chip__input:checked) {
+    border-color: var(--color-foreground);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--oa-accent) 22%, transparent);
+  }
+
+  .oa-chip:has(.oa-chip__input:focus-visible) {
+    outline: var(--focus-outline-width) solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  /* Covers both unavailable products and cap-locked chips (count reached) */
+  .oa-chip:has(.oa-chip__input:disabled:not(:checked)) {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .oa-chip__check {
+    --icon-stroke-width: 2.5px;
+
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--oa-border-glass);
+    border-radius: 5px;
+    color: #111111;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .oa-chip__check svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+  }
+
+  .oa-chip:has(.oa-chip__input:checked) .oa-chip__check {
+    background: var(--oa-accent);
+    border-color: var(--oa-accent);
+  }
+
+  .oa-chip:has(.oa-chip__input:checked) .oa-chip__check svg {
+    opacity: 1;
+  }
+
+  .oa-chip__body {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-  }
-
-  .oa-tier-panel__row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--gap-sm);
-    font-size: 0.8125rem;
-    line-height: 1.4;
-  }
-
-  .oa-tier-panel__component {
+    gap: 1px;
     min-width: 0;
+  }
+
+  .oa-chip__name {
+    font-size: 0.8125rem;
+    font-weight: var(--font-weight-semibold, 600);
+    line-height: 1.25;
     overflow-wrap: break-word;
   }
 
-  .oa-tier-panel__component-price {
-    flex-shrink: 0;
+  .oa-chip__price {
+    font-size: 0.75rem;
+    line-height: 1.2;
   }
 
   .oa-tier-panel__totals {
-    margin-block-start: var(--padding-2xs);
-    padding-block-start: var(--padding-2xs);
-    border-top: 1px solid var(--oa-border-glass);
-  }
-
-  .oa-tier-panel__list + .oa-tier-panel__totals {
     margin-block-start: var(--padding-sm);
     padding-block-start: var(--padding-sm);
+    border-top: 1px solid var(--oa-border-glass);
   }
 
   .oa-tier-panel__separate {
@@ -527,7 +652,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Kafelki pakietów ładowane z metafielda produktu „oklejauto.pakiety” (lista produktów). Panel rozwijany pod kafelkami pokazuje skład z metafielda „oklejauto.sklad” (lista produktów na produkcie pakietu) i wyliczone oszczędności z realnych cen."
+      "content": "Tiery 1 / 2 / 4: klient sam wybiera elementy z kolekcji (chipsy). Cena na stronie produktu jest wyliczana poglądowo — rabat nalicza się w koszyku."
     },
     {
       "type": "text",
@@ -539,60 +664,95 @@
       "type": "text",
       "id": "social_proof_text",
       "label": "Linia social proof",
-      "default": "Najczęściej wybierany: Pakiet 2"
+      "default": "Najczęściej wybierane: 2 elementy"
     },
     {
-      "type": "text",
-      "id": "current_label",
-      "label": "Etykieta pojedynczego elementu",
-      "default": "Sam element"
+      "type": "collection",
+      "id": "collection",
+      "label": "Kolekcja elementów",
+      "info": "Gdy nie wybrano — używana jest kolekcja „elementy”."
     },
     {
       "type": "header",
-      "content": "Etykiety kafelków (fallback)"
+      "content": "Rabaty"
+    },
+    {
+      "type": "range",
+      "id": "discount_pct_2",
+      "label": "Rabat: 2 elementy (%)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "discount_pct_4",
+      "label": "Rabat: 4 elementy (%)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 20
     },
     {
       "type": "paragraph",
-      "content": "Najpierw używany jest metafield „oklejauto.badge” na produkcie pakietu. Gdy pusty — poniższe pola (wg kolejności pakietów na liście)."
+      "content": "Uwaga: rabaty % muszą odpowiadać automatic discounts w adminie Shopify (Pakiet 2+/4+)."
+    },
+    {
+      "type": "header",
+      "content": "Kafelki"
     },
     {
       "type": "text",
-      "id": "badge_1",
-      "label": "Etykieta pakietu 1"
+      "id": "label_tier_1",
+      "label": "Etykieta: 1 element",
+      "default": "1 element"
+    },
+    {
+      "type": "text",
+      "id": "label_tier_2",
+      "label": "Etykieta: 2 elementy",
+      "default": "2 elementy"
+    },
+    {
+      "type": "text",
+      "id": "label_tier_3",
+      "label": "Etykieta: 4 elementy",
+      "default": "4 elementy"
     },
     {
       "type": "text",
       "id": "badge_2",
-      "label": "Etykieta pakietu 2",
+      "label": "Badge: 2 elementy",
       "default": "Popularny"
     },
     {
       "type": "text",
       "id": "badge_3",
-      "label": "Etykieta pakietu 3",
-      "default": "Bestseller"
+      "label": "Badge: 4 elementy",
+      "default": "Najlepsza wartość"
     },
     {
       "type": "header",
-      "content": "Panel składu pakietu"
+      "content": "Panel wyboru"
     },
     {
       "type": "text",
-      "id": "label_includes",
-      "label": "Etykieta listy składu",
-      "default": "W zestawie"
+      "id": "label_counter",
+      "label": "Etykieta licznika",
+      "default": "Wybrano"
     },
     {
       "type": "text",
       "id": "label_separate",
-      "label": "Etykieta sumy osobno",
+      "label": "Etykieta sumy bez rabatu",
       "default": "Osobno"
     },
     {
       "type": "text",
-      "id": "label_bundle",
-      "label": "Etykieta ceny w pakiecie",
-      "default": "W pakiecie"
+      "id": "label_with_discount",
+      "label": "Etykieta ceny z rabatem",
+      "default": "Z rabatem"
     },
     {
       "type": "header",
