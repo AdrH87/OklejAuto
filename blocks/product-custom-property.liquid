@@ -135,7 +135,7 @@
   /* Compact label typography (buy-box density) */
   product-custom-property-component .__heading {
     margin-inline: 0;
-    margin-block: 0 var(--padding-2xs);
+    margin-block: 0 var(--padding-3xs);
     font-size: 0.8125rem;
     font-weight: var(--font-weight-medium, 500);
     line-height: 1.3;
@@ -167,10 +167,12 @@
     color: var(--color-input-text) !important;
   }
 
-  /* Compact inputs: minimum touch target, tightened padding */
+  /* Concise inputs: ~38px height (kept as the mobile touch-target floor),
+     tightened padding, slightly smaller text for buy-box density */
   product-custom-property-component input.field__input {
-    min-height: 44px;
-    padding-block: var(--padding-xs);
+    min-height: 38px;
+    padding-block: var(--padding-2xs);
+    font-size: 0.875rem;
   }
 
   /* Counter padding only when the counter is rendered */

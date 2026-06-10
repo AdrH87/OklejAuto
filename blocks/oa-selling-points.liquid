@@ -13,7 +13,7 @@
     class="oa-selling-points__list"
     role="list"
   >
-    {%- for index in (1..4) -%}
+    {%- for index in (1..5) -%}
       {%- liquid
         assign icon_key = 'icon_' | append: index
         assign label_key = 'label_' | append: index
@@ -48,11 +48,13 @@
     min-width: 0;
   }
 
-  /* Fixed 4-up attribute row: icon above label. Wraps to 2x2 on narrow
-     viewports via the media query below — never scrolls or crops. */
+  /* Attribute row (up to 5 items): icon above label. Flex-wrap with equal
+     item widths — 5-up compact on desktop, 2 per row on narrow viewports
+     (2+2+1 with the odd item centered). Never scrolls or crops. */
   .oa-selling-points__list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: var(--gap-sm) var(--gap-xs);
     margin: 0;
     padding: 0;
@@ -64,6 +66,7 @@
     flex-direction: column;
     align-items: center;
     gap: var(--gap-xs);
+    flex: 0 0 calc((100% - var(--gap-xs)) / 2);
     min-width: 0;
     text-align: center;
   }
@@ -83,8 +86,8 @@
   }
 
   @media screen and (min-width: 480px) {
-    .oa-selling-points__list {
-      grid-template-columns: repeat(4, 1fr);
+    .oa-selling-points__item {
+      flex-basis: calc((100% - 4 * var(--gap-xs)) / 5);
     }
   }
 {% endstylesheet %}
@@ -96,7 +99,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Kompaktowy rząd 4 atutów: ikona nad krótką etykietą. Na wąskich ekranach zawija się do 2x2."
+      "content": "Kompaktowy rząd do 5 atutów: ikona nad krótką etykietą. Na wąskich ekranach zawija się po 2 w rzędzie (ostatni wycentrowany)."
     },
     {
       "type": "header",
@@ -120,7 +123,8 @@
         { "value": "return", "label": "Zwrot" },
         { "value": "heart", "label": "Serce" },
         { "value": "fire", "label": "Ogień" },
-        { "value": "leaf", "label": "Liść" }
+        { "value": "leaf", "label": "Liść" },
+        { "value": "ruler", "label": "Linijka" }
       ],
       "default": "recycle"
     },
@@ -152,7 +156,8 @@
         { "value": "return", "label": "Zwrot" },
         { "value": "heart", "label": "Serce" },
         { "value": "fire", "label": "Ogień" },
-        { "value": "leaf", "label": "Liść" }
+        { "value": "leaf", "label": "Liść" },
+        { "value": "ruler", "label": "Linijka" }
       ],
       "default": "eye"
     },
@@ -184,7 +189,8 @@
         { "value": "return", "label": "Zwrot" },
         { "value": "heart", "label": "Serce" },
         { "value": "fire", "label": "Ogień" },
-        { "value": "leaf", "label": "Liść" }
+        { "value": "leaf", "label": "Liść" },
+        { "value": "ruler", "label": "Linijka" }
       ],
       "default": "stopwatch"
     },
@@ -216,7 +222,8 @@
         { "value": "return", "label": "Zwrot" },
         { "value": "heart", "label": "Serce" },
         { "value": "fire", "label": "Ogień" },
-        { "value": "leaf", "label": "Liść" }
+        { "value": "leaf", "label": "Liść" },
+        { "value": "ruler", "label": "Linijka" }
       ],
       "default": "check_box"
     },
@@ -225,6 +232,39 @@
       "id": "label_4",
       "label": "Tekst",
       "default": "Gwarancja trwałości"
+    },
+    {
+      "type": "header",
+      "content": "Atut 5"
+    },
+    {
+      "type": "select",
+      "id": "icon_5",
+      "label": "Ikona",
+      "options": [
+        { "value": "none", "label": "Brak" },
+        { "value": "recycle", "label": "Regeneracja" },
+        { "value": "eye", "label": "Oko" },
+        { "value": "stopwatch", "label": "Stoper" },
+        { "value": "check_box", "label": "Potwierdzenie" },
+        { "value": "star", "label": "Gwiazdka" },
+        { "value": "lock", "label": "Kłódka" },
+        { "value": "lightning_bolt", "label": "Błyskawica" },
+        { "value": "snowflake", "label": "Śnieżynka" },
+        { "value": "truck", "label": "Dostawa" },
+        { "value": "return", "label": "Zwrot" },
+        { "value": "heart", "label": "Serce" },
+        { "value": "fire", "label": "Ogień" },
+        { "value": "leaf", "label": "Liść" },
+        { "value": "ruler", "label": "Linijka" }
+      ],
+      "default": "ruler"
+    },
+    {
+      "type": "text",
+      "id": "label_5",
+      "label": "Tekst",
+      "default": "Docinana pod Twoje auto"
     },
     {
       "type": "header",
