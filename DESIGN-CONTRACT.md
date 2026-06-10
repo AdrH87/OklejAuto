@@ -20,10 +20,7 @@ All Meta ads traffic lands on **Home** (landing page) → element carousel → P
 6. Krawędzie drzwi
 7. Ekran multimediów (antypaluch)
 
-**3 pakiety** (Pakiet 1/2/3) — tiered bundles of elements, priced below sum of parts.
-**Not browsable at launch**: excluded from collections, carousel, nav. Sold exclusively through the PDP bundle presenter. Later phase: separate "Pakiety" grid for direct selection.
-
-**Per-element pakiet mapping:** each element product carries a metafield referencing which pakiety contain it — the PDP tier selector shows only valid upgrades. Compositions + pricing: pending from client.
+**~~3 pakiety (Pakiet 1/2/3)~~ — RETIRED 2026-06-11.** Produkty pakietowe zarchiwizowane. Stary kontrakt (metafield `oklejauto.pakiety` / skład pakietu, compare_at = suma części, tier selector swapujący produkt) **nie obowiązuje**. Zastąpione builderem v2 choose-your-own — patrz „Bundle builder v2 — kontrakt" niżej.
 
 ## Pages (3)
 
@@ -43,7 +40,7 @@ Grid of 7 elementów only. Fleet-card style, 2-col mobile / 3-col desktop. No fi
 3. Social proof — stars + review count
 4. Reviews + selling points icon row (samoregeneracja, niewidoczna, montaż DIY, gwarancja)
 5. **Vehicle inputs** — Marka, Model, Rocznik (required), Wersja/nadwozie (placeholder "np. M-pakiet, kombi, facelift") — free text → `properties[...]`
-6. **Bundle presenter + ATC** — tier tap-tiles: [Sam element] [Pakiet X −Y%] [Pakiet Z −W%] with savings badges; selection swaps product added; vehicle properties ride along; ATC = white pill full-width
+6. **Bundle builder v2 + ATC** — tiery [1 element] [2 elementy −10%] [4 elementy −20%]; przy 2/4 klient sam wybiera elementy (chips z kolekcji `elementy`); jeden submit = multi-add `/cart/add.js` `items[]`; vehicle properties ride along; ATC = white pill full-width
 7. Payment icons + trust badges
 8. Delivery information
 9. FAQ accordion
@@ -52,6 +49,20 @@ Grid of 7 elementów only. Fleet-card style, 2-col mobile / 3-col desktop. No fi
 Optional (decide on preview): sticky bottom ATC bar — default off.
 
 Accelerated checkout ukryty na PDP — wymusza przejście przez wymagane pola pojazdu (express checkout pozostaje dostępny w koszyku/checkout).
+
+## Bundle builder v2 — kontrakt (2026-06-11, zastępuje pakiety)
+
+Choose-your-own bundle w `blocks/oa-bundle-tier-selector.liquid`: 3 tiery (1 / 2 / 4 elementy), chips elementów ładowane z kolekcji `elementy`, multi-add jednym submitem.
+
+**Invarianty — NIE łamać przy refactorach:**
+- **Submit intercept na window-capture** — listener przechwytujący submit siedzi na `window` w fazie capture. NIE przenosić na element `form` (straci pierwszeństwo i multi-add się rozjedzie).
+- **Jeden żywy `priceContainer`** — w DOM może istnieć tylko jedna aktywna instancja kontenera ceny; duplikaty po re-renderach muszą być sprzątane.
+- **`data-current-checked` morph survival** — stan zaznaczenia radiosów (tiery) i chipsów trzymany w atrybucie `data-current-checked`, żeby przeżył DOM morphing theme'u. Nie zastępować stanem wyłącznie w JS/checked.
+- **Eventy multi-add** dispatchowane z `product-form-component` z `source: 'product-form-component'` — listenery theme'u (cart drawer, liczniki) filtrują po tym source.
+- **Cap-lock chipsów** — po osiągnięciu limitu tieru pozostałe chipsy są zablokowane; nie można wybrać więcej niż cap.
+- **PDP cena = preview.** Źródłem prawdy rabatu jest **automatic discount** naliczany w koszyku. PDP tylko wylicza poglądowo "Osobno" vs "Z rabatem".
+- **`discount_pct_2` / `discount_pct_4` w schema muszą matchować automatic discounts w adminie** (2+ → 10%, 4+ → 20%). Zmiana % w jednym miejscu bez drugiego = kłamiąca cena. (Stan 2026-06-11: discounts jeszcze NIE utworzone — brak `write_discounts` w CLI auth; pliki w `c:\tmp\oklej-gql`.)
+- Vehicle properties (Marka/Model/Rocznik/Wersja) jadą na każdym itemie multi-adda + jako cart attribute `vehicle` (klucze w settings bloku: `vehicle_keys`, `attribute_key`).
 
 ## Design tokens (LuxxCar → Savor)
 

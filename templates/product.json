@@ -67,22 +67,6 @@
             "padding-inline-end": 12
           },
           "blocks": {
-            "oa_benefit_badges": {
-              "type": "oa-benefit-badges",
-              "settings": {
-                "icon_1": "recycle",
-                "label_1": "Samoregenerująca powłoka",
-                "icon_2": "eye",
-                "label_2": "Niewidoczna po montażu",
-                "icon_3": "check_box",
-                "label_3": "Gwarancja trwałości",
-                "padding-block-start": 0,
-                "padding-block-end": 2,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
             "text_tefwj7": {
               "type": "text",
               "name": "t:names.title",
@@ -91,7 +75,7 @@
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
-                "type_preset": "h2",
+                "type_preset": "h3",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -120,18 +104,6 @@
               },
               "blocks": {}
             },
-            "oa_usp_line": {
-              "type": "oa-usp-line",
-              "settings": {
-                "icon": "ruler",
-                "text": "Docinana pod Twoje auto — montaż w kilka minut",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
             "oa_selling_points": {
               "type": "oa-selling-points",
               "settings": {
@@ -143,6 +115,8 @@
                 "label_3": "Montaż DIY",
                 "icon_4": "check_box",
                 "label_4": "Gwarancja trwałości",
+                "icon_5": "ruler",
+                "label_5": "Docinana pod Twoje auto",
                 "padding-block-start": 4,
                 "padding-block-end": 4,
                 "padding-inline-start": 0,
@@ -337,14 +311,18 @@
               "type": "oa-bundle-tier-selector",
               "settings": {
                 "heading": "Wybierz zakres ochrony",
-                "social_proof_text": "Najczęściej wybierany: Pakiet 2",
-                "current_label": "Sam element",
-                "badge_1": "",
+                "social_proof_text": "Najczęściej wybierane: 2 elementy",
+                "collection": "elementy",
+                "discount_pct_2": 10,
+                "discount_pct_4": 20,
+                "label_tier_1": "1 element",
+                "label_tier_2": "2 elementy",
+                "label_tier_3": "4 elementy",
                 "badge_2": "Popularny",
-                "badge_3": "Bestseller",
-                "label_includes": "W zestawie",
+                "badge_3": "Najlepsza wartość",
+                "label_counter": "Wybrano",
                 "label_separate": "Osobno",
-                "label_bundle": "W pakiecie",
+                "label_with_discount": "Z rabatem",
                 "vehicle_keys": "Marka,Model,Rocznik,Wersja / nadwozie",
                 "attribute_key": "vehicle",
                 "padding-block-start": 4,
@@ -395,7 +373,7 @@
               "type": "text",
               "name": "Informacje o dostawie",
               "settings": {
-                "text": "<p>Wysyłka w 24-48h • Darmowa dostawa od 199 zł • 30 dni na zwrot</p>",
+                "text": "<p>Darmowa dostawa od 199 zł • Docinane na zamówienie pod Twoje auto</p>",
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "left",
@@ -420,9 +398,9 @@
             "oa_trust_block": {
               "type": "oa-trust-block",
               "settings": {
-                "icon": "return",
-                "heading": "Przetestuj 30 dni bez ryzyka",
-                "text": "Nie pasuje? Odeślij folię w ciągu 30 dni, a zwrócimy Ci pełną kwotę. Bez pytań.",
+                "icon": "truck",
+                "heading": "Wysyłka w 24-48 godzin",
+                "text": "Twoją wycinkę docinamy na zamówienie i wysyłamy w ciągu 24-48 godzin od zakupu.",
                 "padding-block-start": 2,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
@@ -434,7 +412,7 @@
               "type": "text",
               "name": "Nagłówek — FAQ",
               "settings": {
-                "text": "<h3>Częste pytania</h3>",
+                "text": "<h3>Najczęściej zadawane pytania</h3>",
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "left",
@@ -580,10 +558,8 @@
             }
           },
           "block_order": [
-            "oa_benefit_badges",
             "text_tefwj7",
             "reviews",
-            "oa_usp_line",
             "oa_selling_points",
             "text_vehicle_heading",
             "group_vehicle_row_1",
@@ -610,6 +586,55 @@
         "padding-block-end": 0
       }
     },
+    "oa_process_steps": {
+      "type": "oa-process-steps",
+      "settings": {
+        "heading": "Montaż prostszy, niż myślisz",
+        "subheading": "Zestaw jest precyzyjnie docięty pod Twoje auto — niczego nie przycinasz. Wystarczy woda, rakielka i chwila spokoju.",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 64,
+        "padding-block-end": 64
+      },
+      "blocks": {
+        "step_1": {
+          "type": "step",
+          "settings": {
+            "heading": "Wyczyść i odtłuść",
+            "text": "Element musi być czysty i suchy. Wystarczy alkohol izopropylowy albo płyn do szyb.",
+            "duration": "~2 min"
+          },
+          "blocks": {}
+        },
+        "step_2": {
+          "type": "step",
+          "settings": {
+            "heading": "Zwilż powierzchnię",
+            "text": "Woda z kroplą płynu do naczyń w spryskiwaczu. Dzięki niej folia daje się swobodnie pozycjonować.",
+            "duration": "~1 min"
+          },
+          "blocks": {}
+        },
+        "step_3": {
+          "type": "step",
+          "settings": {
+            "heading": "Przyłóż wycinkę",
+            "text": "Folia jest docięta pod Twoje auto — niczego nie przycinasz. Ustaw na miejscu i dociśnij.",
+            "duration": "~3 min"
+          },
+          "blocks": {}
+        },
+        "step_4": {
+          "type": "step",
+          "settings": {
+            "heading": "Wygoń wodę i gotowe",
+            "text": "Rakielką, od środka na zewnątrz. Po kilku godzinach folia w pełni chwyta powierzchnię.",
+            "duration": "~3 min"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": ["step_1", "step_2", "step_3", "step_4"]
+    },
     "oa_extended_content_slot": {
       "type": "custom-liquid",
       "name": "OA — slot na rozszerzony dowód",
@@ -621,279 +646,130 @@
         "padding-block-end": 0
       }
     },
-    "product_recommendations_iA6pyd": {
-      "type": "product-recommendations",
+    "oa_content_why": {
+      "type": "media-with-content",
+      "name": "OA — Dlaczego warto chronić detale",
+      "settings": {
+        "media_position": "left",
+        "media_width": "medium",
+        "media_height": "60svh",
+        "section_width": "full-width",
+        "color_scheme": "scheme-4",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
       "blocks": {
-        "static-product-card": {
-          "type": "_product-card",
-          "name": "t:names.product_card",
+        "media": {
+          "type": "_media-without-appearance",
+          "static": true,
+          "settings": {},
+          "blocks": {}
+        },
+        "content": {
+          "type": "_content-without-appearance",
           "static": true,
           "settings": {
-            "product_card_gap": 0,
-            "inherit_color_scheme": false,
-            "color_scheme": "scheme-2",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center"
           },
           "blocks": {
-            "product_card_gallery_8xaiqA": {
-              "type": "_product-card-gallery",
-              "name": "t:names.product_card_media",
+            "group": {
+              "type": "group",
               "settings": {
-                "image_ratio": "square",
-                "border": "none",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "group_7YP4cy": {
-              "type": "_product-card-group",
-              "name": "t:names.group",
-              "settings": {
-                "open_in_new_tab": false,
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "space-between",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "space-between",
-                "gap": 4,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "inherit_color_scheme": true,
-                "color_scheme": "scheme-2",
-                "background_media": "none",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "border": "none",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_radius": 0,
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "padding-block-start": 12,
-                "padding-block-end": 12,
-                "padding-inline-start": 12,
-                "padding-inline-end": 12
+                "height": "fit"
               },
               "blocks": {
-                "group_3RWczc": {
-                  "type": "_product-card-group",
-                  "name": "t:names.group",
+                "heading": {
+                  "type": "text",
+                  "name": "t:names.heading",
                   "settings": {
-                    "open_in_new_tab": false,
-                    "content_direction": "row",
-                    "vertical_on_mobile": true,
-                    "horizontal_alignment": "space-between",
-                    "vertical_alignment": "center",
-                    "align_baseline": false,
-                    "horizontal_alignment_flex_direction_column": "flex-start",
-                    "vertical_alignment_flex_direction_column": "flex-start",
-                    "gap": 8,
-                    "width": "fill",
-                    "custom_width": 75,
-                    "width_mobile": "fill",
-                    "custom_width_mobile": 75,
-                    "height": "fit",
-                    "custom_height": 100,
-                    "inherit_color_scheme": true,
-                    "color_scheme": "",
-                    "background_media": "none",
-                    "video_position": "cover",
-                    "background_image_position": "cover",
-                    "border": "none",
-                    "border_width": 1,
-                    "border_opacity": 100,
-                    "border_radius": 0,
-                    "toggle_overlay": false,
-                    "overlay_color": "#00000026",
-                    "overlay_style": "solid",
-                    "gradient_direction": "to top",
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
+                    "text": "<h3>Dlaczego warto chronić detale</h3>",
+                    "type_preset": "h3"
                   },
-                  "blocks": {
-                    "product_title_wWUJwp": {
-                      "type": "product-title",
-                      "name": "t:names.product_title",
-                      "settings": {
-                        "width": "fit-content",
-                        "max_width": "normal",
-                        "alignment": "left",
-                        "type_preset": "h5",
-                        "font": "var(--font-body--family)",
-                        "font_size": "1rem",
-                        "line_height": "normal",
-                        "letter_spacing": "normal",
-                        "case": "none",
-                        "wrap": "pretty",
-                        "color": "var(--color-foreground)",
-                        "background": false,
-                        "background_color": "#00000026",
-                        "corner_radius": 0,
-                        "padding-block-start": 0,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    },
-                    "price_NpRMFV": {
-                      "type": "price",
-                      "name": "t:names.product_price",
-                      "settings": {
-                        "show_sale_price_first": true,
-                        "show_installments": false,
-                        "show_tax_info": false,
-                        "type_preset": "paragraph",
-                        "width": "fit-content",
-                        "alignment": "right",
-                        "font": "var(--font-body--family)",
-                        "font_size": "1rem",
-                        "line_height": "normal",
-                        "letter_spacing": "normal",
-                        "case": "none",
-                        "color": "var(--color-foreground)",
-                        "padding-block-start": 0,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    }
-                  },
-                  "block_order": [
-                    "product_title_wWUJwp",
-                    "price_NpRMFV"
-                  ]
+                  "blocks": {}
                 },
-                "group_HTthnM": {
-                  "type": "_product-card-group",
-                  "name": "t:names.group",
+                "text": {
+                  "type": "text",
                   "settings": {
-                    "open_in_new_tab": false,
-                    "content_direction": "column",
-                    "vertical_on_mobile": true,
-                    "horizontal_alignment": "flex-start",
-                    "vertical_alignment": "center",
-                    "align_baseline": false,
-                    "horizontal_alignment_flex_direction_column": "flex-start",
-                    "vertical_alignment_flex_direction_column": "flex-start",
-                    "gap": 12,
-                    "width": "fill",
-                    "custom_width": 100,
-                    "width_mobile": "custom",
-                    "custom_width_mobile": 25,
-                    "height": "fit",
-                    "custom_height": 100,
-                    "inherit_color_scheme": true,
-                    "color_scheme": "",
-                    "background_media": "none",
-                    "video_position": "cover",
-                    "background_image_position": "cover",
-                    "border": "none",
-                    "border_width": 1,
-                    "border_opacity": 100,
-                    "border_radius": 0,
-                    "toggle_overlay": false,
-                    "overlay_color": "#00000026",
-                    "overlay_style": "solid",
-                    "gradient_direction": "to top",
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
+                    "text": "<p>Klamki, progi i krawędzie drzwi rysują się najszybciej — to ich dotykasz i obijasz na co dzień. Lakierowanie albo wymiana elementu kosztuje wielokrotność folii, która zatrzymuje te uszkodzenia, zanim powstaną.</p>",
+                    "max_width": "narrow",
+                    "type_preset": "rte"
                   },
-                  "blocks": {
-                    "text_Dj8eVT": {
-                      "type": "text",
-                      "name": "t:names.text",
-                      "settings": {
-                        "text": "<p>{{ closest.product.metafields.descriptors.subtitle.value }}</p>",
-                        "width": "100%",
-                        "max_width": "normal",
-                        "alignment": "left",
-                        "type_preset": "custom",
-                        "font": "var(--font-primary--family)",
-                        "font_size": "var(--font-size--body-md)",
-                        "line_height": "normal",
-                        "letter_spacing": "normal",
-                        "case": "none",
-                        "wrap": "pretty",
-                        "color": "",
-                        "background": false,
-                        "background_color": "#00000026",
-                        "corner_radius": 0,
-                        "padding-block-start": 0,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    }
-                  },
-                  "block_order": [
-                    "text_Dj8eVT"
-                  ]
+                  "blocks": {}
                 }
               },
-              "block_order": [
-                "group_3RWczc",
-                "group_HTthnM"
-              ]
+              "block_order": ["heading", "text"]
             }
           },
-          "block_order": [
-            "product_card_gallery_8xaiqA",
-            "group_7YP4cy"
-          ]
+          "block_order": ["group"]
         }
-      },
-      "name": "t:names.product_recommendations",
+      }
+    },
+    "oa_content_care": {
+      "type": "media-with-content",
+      "name": "OA — Folia bez obsługi",
       "settings": {
-        "product": "{{ closest.product }}",
-        "recommendation_type": "related",
-        "layout_type": "grid",
-        "carousel_on_mobile": false,
-        "max_products": 6,
-        "columns": 3,
-        "mobile_columns": "1",
-        "columns_gap": 1,
-        "rows_gap": 2,
-        "icons_style": "arrow",
-        "icons_shape": "none",
+        "media_position": "right",
+        "media_width": "medium",
+        "media_height": "60svh",
         "section_width": "full-width",
-        "gap": 0,
-        "color_scheme": "scheme-1",
-        "padding-block-start": 1,
-        "padding-block-end": 1
+        "color_scheme": "scheme-4",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
+      "blocks": {
+        "media": {
+          "type": "_media-without-appearance",
+          "static": true,
+          "settings": {},
+          "blocks": {}
+        },
+        "content": {
+          "type": "_content-without-appearance",
+          "static": true,
+          "settings": {
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center"
+          },
+          "blocks": {
+            "group": {
+              "type": "group",
+              "settings": {
+                "height": "fit"
+              },
+              "blocks": {
+                "heading": {
+                  "type": "text",
+                  "name": "t:names.heading",
+                  "settings": {
+                    "text": "<h3>Folia, o którą nie musisz dbać</h3>",
+                    "type_preset": "h3"
+                  },
+                  "blocks": {}
+                },
+                "text": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>Myjesz auto tak, jak do tej pory — ręcznie albo na myjni. Drobne rysy znikają same pod wpływem ciepła, a powłoka chroni lakier przez lata bez dodatkowych zabiegów.</p>",
+                    "max_width": "narrow",
+                    "type_preset": "rte"
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["heading", "text"]
+            }
+          },
+          "block_order": ["group"]
+        }
       }
     }
   },
   "order": [
     "main",
+    "oa_process_steps",
     "oa_extended_content_slot",
-    "product_recommendations_iA6pyd"
+    "oa_content_why",
+    "oa_content_care"
   ]
 }

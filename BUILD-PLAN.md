@@ -112,7 +112,7 @@ All copy **Polish**. Zero `!important` — CSS vars + specificity.
 **BLOCKED — Adrian:**
 1. Storefront password (admin → Online Store → Preferences) → odblokowuje `shopify theme dev` + screenshoty 375/1440
 2. `shopify store auth --store test-z4rrgor8.myshopify.com --scopes read_products,write_products` — kliknąć approve w przeglądarce → odblokowuje dummy products
-3. Pakiet 1/2/3: skład + ceny (potrzebne do metafield oklejauto.pakiety + compare_at = suma części)
+3. ~~Pakiet 1/2/3: skład + ceny~~ — **RETIRED 2026-06-11** (pakiety zarchiwizowane, zastąpione builderem v2 — patrz STATUS 2026-06-11)
 4. Assety: hero video, zdjęcia elementów/stref, opinie, liczby do stat chips
 
 **NEXT (po odblokowaniu):**
@@ -120,3 +120,34 @@ All copy **Polish**. Zero `!important` — CSS vars + specificity.
 2. Render 375px + 1440px → screenshoty → approval Adriana (visual gate)
 3. Verify na żywo: disabled accelerated-checkout faktycznie znika (platform-runtime caveat z review), tier selector E2E (properties w /cart.js)
 4. Store language → PL (theme ma locales/pl.json), nav menu (Sklep), strona /collections/elementy
+
+---
+
+## STATUS 2026-06-11 — Iteration 3 (resume-state)
+
+**Bundle builder v2 — choose-your-own (zastępuje Pakiety 1/2/3):**
+- 3 tiery: **1 / 2 / 4 elementy**; przy 2/4 klient sam wybiera elementy (chips z kolekcji `elementy` — 7 produktów)
+- Multi-add: jeden submit → `/cart/add.js` z `items[]` (główny produkt + wybrane chipsy); vehicle properties + cart attribute ride along
+- Rabaty przez **automatic discounts** (2+ → 10%, 4+ → 20%). PDP liczy cenę poglądowo ("Z rabatem"), źródłem prawdy jest discount naliczany w koszyku
+- **UWAGA — discounts NIE utworzone:** brak `write_discounts` w CLI auth. Pliki gotowe w `c:\tmp\oklej-gql`: `discount-create.graphql` + `vars-discount-2plus.json` / `vars-discount-4plus.json` — odpalić po doauthowaniu
+- Pakiet 1/2/3: produkty **ARCHIVED**; stary kontrakt `oklejauto.pakiety` + compare_at retired (patrz DESIGN-CONTRACT.md)
+- Kolekcja `elementy`: 7 elementów
+
+**Template wire-up `templates/product.json` (2026-06-11):**
+- Usunięte bloki `oa_benefit_badges` + `oa_usp_line` (pliki .liquid skasowane); "Docinana pod Twoje auto" = 5. atut w oa-selling-points (icon_5/label_5 w template)
+- `oa_tier_selector`: settings podmienione pod nową schemę v2 (heading/social proof/collection/discount_pct_2=10/discount_pct_4=20/label_tier_1-3/badge_2-3/label_counter/label_separate/label_with_discount/vehicle_keys/attribute_key)
+- Trust block → wysyłka: ikona `truck`, "Wysyłka w 24-48 godzin"; delivery line → "Darmowa dostawa od 199 zł • Docinane na zamówienie pod Twoje auto"; FAQ heading → "Najczęściej zadawane pytania"; tytuł produktu `type_preset` h2→h3 (max 2 linie)
+- Nowa sekcja `oa-process-steps` (4 kroki montażu, czasy ~1-3 min) zaraz po `main` — **wideo kroków czekają na klipy klienta** (do tego czasu placeholder/fallback image)
+- `product_recommendations` usunięte → 2x `media-with-content` (struktura per preset editorial): `oa_content_why` ("Dlaczego warto chronić detale") + `oa_content_care` ("Folia, o którą nie musisz dbać") — bez obrazków (placeholder SVG do czasu assetów klienta)
+- Finalny order: `main → oa_process_steps → oa_extended_content_slot → oa_content_why → oa_content_care`
+- Header: transparent off na product/collection
+
+**BLOCKED — Adrian (aktualizacja):**
+1. Storefront password → `shopify theme dev` + screenshoty 375/1440 (bez zmian)
+2. CLI auth ze scope `write_discounts` → utworzenie 2 automatic discounts z `c:\tmp\oklej-gql`
+3. Assety: hero video, klipy montażowe do oa-process-steps, zdjęcia do sekcji media-with-content, opinie
+
+**NEXT:**
+1. Automatic discounts (2+/4+) — bez nich rabat z PDP nie naliczy się w koszyku (PDP = preview)
+2. Render 375/1440 → screenshoty → visual gate Adriana
+3. E2E builder v2: multi-add `items[]` w `/cart.js` + atrybut `vehicle` + naliczenie discountu w koszyku
