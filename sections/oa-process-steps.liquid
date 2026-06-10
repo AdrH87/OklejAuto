@@ -1,0 +1,478 @@
+{% comment %}
+  OA — Proces aplikacji (zigzag)
+  Naprzemienne wiersze tekst/wideo pokazujące montaż wycinki PPF krok po kroku.
+  Wideo są dekoracyjnymi loopami: autoplay + muted + loop + playsinline, bez
+  kontrolek. IntersectionObserver gra tylko klipy w viewporcie; przy
+  prefers-reduced-motion nic nie autoplayuje.
+{% endcomment %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  id="oa-process-{{ section.id }}"
+  class="oa-process section section--page-width color-{{ section.settings.color_scheme }} spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+  <div class="oa-process__header">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="oa-process__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.subheading != blank -%}
+      <p class="oa-process__subheading oa-muted">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+  </div>
+
+  {%- if section.blocks.size > 0 -%}
+    <ol class="oa-process__steps">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'step' -%}
+          {%- liquid
+            assign step_number = forloop.index | prepend: '0' | slice: -2, 2
+          -%}
+          <li class="oa-process__step" {{ block.shopify_attributes }}>
+            {%- comment -%}
+              Wideo/zdjęcie jest czysto dekoracyjne (loop montażowy bez treści
+              merytorycznej) — cały wrapper poza drzewem dostępności.
+            {%- endcomment -%}
+            <div class="oa-process__media" aria-hidden="true">
+              {%- if block.settings.video != blank -%}
+                {{
+                  block.settings.video
+                  | video_tag:
+                    image_size: '1100x',
+                    autoplay: true,
+                    loop: true,
+                    muted: true,
+                    controls: false,
+                    playsinline: true,
+                    preload: 'metadata',
+                    class: 'oa-process__video'
+                }}
+              {%- elsif block.settings.fallback_image != blank -%}
+                {{
+                  block.settings.fallback_image
+                  | image_url: width: 1400
+                  | image_tag:
+                    widths: '450, 750, 1100, 1400',
+                    sizes: '(min-width: 990px) 50vw, 100vw',
+                    loading: 'lazy',
+                    alt: '',
+                    class: 'oa-process__image'
+                }}
+              {%- else -%}
+                <div class="oa-process__media-placeholder">
+                  <span class="oa-process__media-placeholder-number">{{ step_number }}</span>
+                  <span class="oa-process__media-placeholder-icon">
+                    {{- 'icon-play.svg' | inline_asset_content -}}
+                  </span>
+                </div>
+              {%- endif -%}
+            </div>
+
+            <div class="oa-process__body">
+              <span class="oa-process__number" aria-hidden="true">{{ step_number }}</span>
+
+              {%- if block.settings.heading != blank -%}
+                <h3 class="oa-process__step-heading">{{ block.settings.heading }}</h3>
+              {%- endif -%}
+
+              {%- if block.settings.text != blank -%}
+                <p class="oa-process__step-text oa-muted">{{ block.settings.text }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.duration != blank -%}
+                <span class="oa-pill oa-process__duration">{{ block.settings.duration }}</span>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+  {%- endif -%}
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById('oa-process-{{ section.id }}');
+    if (!root) return;
+
+    var videos = Array.prototype.slice.call(root.querySelectorAll('video'));
+    if (!videos.length) return;
+
+    function pause(video) {
+      try {
+        video.pause();
+      } catch (e) {
+        /* noop */
+      }
+    }
+
+    function play(video) {
+      var promise = video.play();
+      if (promise && typeof promise.catch === 'function') {
+        promise.catch(function () {
+          /* autoplay blocked — poster/pierwsza klatka zostaje */
+        });
+      }
+    }
+
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (reducedMotion.matches) {
+      videos.forEach(function (video) {
+        video.removeAttribute('autoplay');
+        pause(video);
+      });
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            play(entry.target);
+          } else {
+            pause(entry.target);
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+
+    videos.forEach(function (video) {
+      observer.observe(video);
+    });
+
+    if (typeof reducedMotion.addEventListener === 'function') {
+      reducedMotion.addEventListener('change', function (event) {
+        if (event.matches) {
+          observer.disconnect();
+          videos.forEach(pause);
+        }
+      });
+    }
+  })();
+</script>
+
+{% stylesheet %}
+  .oa-process__header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-block-end: 32px;
+  }
+
+  .oa-process__heading {
+    margin: 0;
+    max-width: 20ch;
+    font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .oa-process__subheading {
+    margin: 0;
+    max-width: 52ch;
+    line-height: 1.55;
+  }
+
+  .oa-process__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Mobile: stack media → tekst per krok */
+  .oa-process__step {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .oa-process__media {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--oa-radius-card, 12px);
+    background: var(--oa-surface-card, #1f1f1f);
+  }
+
+  .oa-process__media video,
+  .oa-process__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .oa-process__media-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+    background: var(--oa-surface-glass, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--oa-border-glass, rgba(255, 255, 255, 0.1));
+    border-radius: var(--oa-radius-card, 12px);
+  }
+
+  .oa-process__media-placeholder-number {
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--oa-border-glass, rgba(255, 255, 255, 0.1));
+  }
+
+  .oa-process__media-placeholder-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--oa-border-glass, rgba(255, 255, 255, 0.1));
+    border-radius: var(--oa-radius-pill, 99px);
+    color: var(--oa-text-muted, rgba(255, 255, 255, 0.55));
+  }
+
+  .oa-process__media-placeholder-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .oa-process__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .oa-process__number {
+    font-size: clamp(2.25rem, 3vw + 1rem, 3.25rem);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--oa-accent, #f7be18);
+  }
+
+  .oa-process__step-heading {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .oa-process__step-text {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .oa-process__duration {
+    margin-block-start: 2px;
+    color: var(--oa-text-muted, rgba(255, 255, 255, 0.55));
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* JS dodatkowo pauzuje — tu tylko gasimy ewentualne transitions */
+    .oa-process__media video {
+      transition: none;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .oa-process__header {
+      margin-block-end: 44px;
+    }
+
+    .oa-process__steps {
+      gap: 48px;
+    }
+
+    .oa-process__step-heading {
+      font-size: 1.5rem;
+    }
+
+    .oa-process__step-text {
+      font-size: 1rem;
+    }
+  }
+
+  /*
+   * Zigzag (desktop): każdy krok to grid 2 kolumny. Media są pierwszym
+   * dzieckiem w DOM — w wierszach nieparzystych lądują po lewej, w parzystych
+   * `order: 2` przerzuca je na prawo, a tekst spada do lewej kolumny.
+   */
+  @media screen and (min-width: 990px) {
+    .oa-process__steps {
+      gap: 56px;
+    }
+
+    .oa-process__step {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(32px, 4vw, 64px);
+      align-items: center;
+    }
+
+    .oa-process__step:nth-child(even) .oa-process__media {
+      order: 2;
+    }
+
+    .oa-process__media {
+      aspect-ratio: 16 / 10;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "OA — Proces aplikacji",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Treść"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Nagłówek",
+      "default": "Montaż prostszy, niż myślisz"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Tekst pod nagłówkiem",
+      "default": "Zestaw jest precyzyjnie docięty pod Twoje auto — niczego nie przycinasz. Wystarczy woda, rakielka i chwila spokoju."
+    },
+    {
+      "type": "header",
+      "content": "Wygląd"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Schemat kolorów",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Odstępy"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Góra",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Dół",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Krok montażu",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Wideo",
+          "info": "Krótki loop montażowy z plików sklepu. Odtwarza się automatycznie, bez dźwięku i bez kontrolek."
+        },
+        {
+          "type": "image_picker",
+          "id": "fallback_image",
+          "label": "Zdjęcie zastępcze",
+          "info": "Używane, gdy nie wybierzesz wideo."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Nagłówek kroku",
+          "default": "Wyczyść i odtłuść"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Opis kroku",
+          "default": "Element musi być czysty i suchy. Wystarczy alkohol izopropylowy albo płyn do szyb."
+        },
+        {
+          "type": "text",
+          "id": "duration",
+          "label": "Czas trwania (opcjonalnie)",
+          "info": "Np. „~2 min”. Zostaw puste, aby ukryć."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "OA — Proces aplikacji",
+      "category": "OklejAuto",
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "heading": "Wyczyść i odtłuść",
+            "text": "Element musi być czysty i suchy. Wystarczy alkohol izopropylowy albo płyn do szyb.",
+            "duration": "~2 min"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "heading": "Zwilż powierzchnię",
+            "text": "Woda z kroplą płynu do naczyń w spryskiwaczu. Dzięki niej folia daje się swobodnie pozycjonować.",
+            "duration": "~1 min"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "heading": "Przyłóż wycinkę",
+            "text": "Folia jest docięta pod Twoje auto — niczego nie przycinasz. Ustaw na miejscu i dociśnij.",
+            "duration": "~3 min"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "heading": "Wygoń wodę i gotowe",
+            "text": "Rakielką, od środka na zewnątrz. Po kilku godzinach folia w pełni chwyta powierzchnię.",
+            "duration": "~3 min"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
