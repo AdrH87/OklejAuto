@@ -34,7 +34,9 @@
     flex-direction: column;
     gap: 24px;
     max-width: 720px;
-    margin-inline: auto;
+    /* left-aligned like every other section — the centered column broke the
+       page's alignment rhythm (all other sections sit hard-left on the grid) */
+    margin-inline: 0;
   }
 
   .oa-faq__heading {
