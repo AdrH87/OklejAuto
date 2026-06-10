@@ -1,4 +1,4 @@
-﻿# OklejAuto — PPF Store Theme Build (Savor → LuxxCar vibe)
+# OklejAuto — PPF Store Theme Build (Savor → LuxxCar vibe)
 
 ## Context
 
