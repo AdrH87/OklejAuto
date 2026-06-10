@@ -310,6 +310,15 @@
     margin-block-start: var(--gap-xs);
   }
 
+  /* Narrow phones: fixed 2-col grid — 4 tiles read as a tidy 2x2 instead of
+     an uneven 3+1 wrap; tiles get wider, names wrap less */
+  @media screen and (max-width: 479px) {
+    .oa-tier-selector__group {
+      grid-template-columns: repeat(2, 1fr);
+      row-gap: 14px; /* room for flags overlapping the second row */
+    }
+  }
+
   .oa-tier {
     position: relative;
     display: flex;
