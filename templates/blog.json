@@ -20,13 +20,13 @@
             "max_width": "narrow",
             "alignment": "left",
             "type_preset": "h2",
-            "font": "var(--font-primary--family)",
+            "font": "var(--font-body--family)",
             "font_size": "",
             "line_height": "normal",
             "letter_spacing": "normal",
             "case": "none",
             "wrap": "pretty",
-            "color": "",
+            "color": "var(--color-foreground)",
             "background": false,
             "background_color": "#00000026",
             "corner_radius": 0,
@@ -49,14 +49,14 @@
               "name": "t:names.title",
               "static": true,
               "settings": {
-                "type_preset": "h4",
-                "font": "var(--font-primary--family)",
+                "type_preset": "h3",
+                "font": "var(--font-body--family)",
                 "font_size": "",
                 "line_height": "normal",
                 "letter_spacing": "normal",
                 "case": "none",
                 "wrap": "pretty",
-                "color": "",
+                "color": "var(--color-foreground)",
                 "text": "",
                 "read_only": true,
                 "alignment": "left",
@@ -73,7 +73,7 @@
               "name": "t:names.details",
               "static": true,
               "settings": {
-                "show_date": true,
+                "show_date": false,
                 "show_author": false,
                 "type_preset": "",
                 "alignment": "left",
@@ -87,11 +87,11 @@
               "type": "_blog-post-image",
               "static": true,
               "settings": {
-                "height": "large",
+                "height": "medium",
                 "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
-                "border_radius": 4
+                "border_radius": 0
               },
               "blocks": {}
             }
@@ -103,7 +103,7 @@
         "title"
       ],
       "settings": {
-        "color_scheme": "",
+        "color_scheme": "scheme-1",
         "padding-block-start": 0,
         "padding-block-end": 48
       }
