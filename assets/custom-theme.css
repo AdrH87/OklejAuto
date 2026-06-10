@@ -1,0 +1,55 @@
+/*
+ * OklejAuto design system overrides
+ * Reference: LuxxCar (dark premium automotive). Tokens: DESIGN-CONTRACT.md
+ * Loaded after theme-styles-variables + color-schemes — :root overrides win
+ * by cascade order, never by !important.
+ */
+
+:root {
+  /* Golos Text everywhere; Inter (theme font picker) stays as fallback */
+  --font-body--family: 'Golos Text', Inter, sans-serif;
+  --font-subheading--family: 'Golos Text', Inter, sans-serif;
+  --font-heading--family: 'Golos Text', Inter, sans-serif;
+  --font-accent--family: 'Golos Text', Inter, sans-serif;
+
+  /* LuxxCar heading tracking is subtle (-0.01em), theme's "tight" presets
+     are -0.03em — recalibrate the presets instead of touching selectors */
+  --letter-spacing--display-tight: -0.015em;
+  --letter-spacing--heading-tight: -0.01em;
+  --letter-spacing--display-normal: -0.01em;
+  --letter-spacing--heading-normal: -0.01em;
+
+  /* Shared surface tokens for custom sections/blocks (glass card pattern) */
+  --oa-surface-card: #1f1f1f;
+  --oa-surface-glass: rgba(255, 255, 255, 0.05);
+  --oa-border-glass: rgba(255, 255, 255, 0.1);
+  --oa-text-muted: rgba(255, 255, 255, 0.55);
+  --oa-accent: #f7be18;
+  --oa-radius-card: 12px;
+  --oa-radius-pill: 99px;
+}
+
+/* Glass card primitive — used by custom OklejAuto sections/blocks */
+.oa-glass {
+  background: var(--oa-surface-glass);
+  border: 1px solid var(--oa-border-glass);
+  border-radius: var(--oa-radius-card);
+}
+
+/* Spec pill (LuxxCar card meta: "542 hp" / "Automatic") */
+.oa-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.35em 0.9em;
+  background: var(--oa-surface-glass);
+  border: 1px solid var(--oa-border-glass);
+  border-radius: var(--oa-radius-pill);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+}
+
+/* Muted supporting text inside custom sections */
+.oa-muted {
+  color: var(--oa-text-muted);
+}
