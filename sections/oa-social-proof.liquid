@@ -1,0 +1,486 @@
+{% liquid
+  assign has_photos = false
+  for block in section.blocks
+    if block.type == 'photo'
+      assign has_photos = true
+    endif
+  endfor
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="oa-social section section--page-width color-{{ section.settings.color_scheme }} spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+  <div class="oa-social__grid">
+    <div class="oa-social__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="oa-social__kicker">{{ section.settings.kicker }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h2 class="oa-social__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.description != blank -%}
+        <p class="oa-social__description oa-muted">{{ section.settings.description }}</p>
+      {%- endif -%}
+
+      <div class="oa-social__stats">
+        {%- if section.settings.stat_1_value != blank -%}
+          <span class="oa-pill oa-social__stat">
+            <strong>{{ section.settings.stat_1_value }}</strong>
+            <span class="oa-muted">{{ section.settings.stat_1_label }}</span>
+          </span>
+        {%- endif -%}
+        {%- if section.settings.stat_2_value != blank -%}
+          <span class="oa-pill oa-social__stat">
+            <strong>{{ section.settings.stat_2_value }}</strong>
+            <span class="oa-muted">{{ section.settings.stat_2_label }}</span>
+          </span>
+        {%- endif -%}
+        {%- if section.settings.stat_3_value != blank -%}
+          <span class="oa-pill oa-social__stat">
+            <strong>{{ section.settings.stat_3_value }}</strong>
+            <span class="oa-muted">{{ section.settings.stat_3_label }}</span>
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="oa-social__reviews" role="list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'review' -%}
+          <div class="oa-social__review oa-glass" role="listitem" {{ block.shopify_attributes }}>
+            <span class="oa-social__stars" aria-hidden="true">
+              {%- for i in (1..5) -%}
+                <svg class="oa-social__star" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2l-6.1 3.4 1.4-6.8L2.2 9.1l6.9-.8z"/>
+                </svg>
+              {%- endfor -%}
+            </span>
+
+            {%- if block.settings.quote != blank -%}
+              <blockquote class="oa-social__quote">{{ block.settings.quote }}</blockquote>
+            {%- endif -%}
+
+            <div class="oa-social__meta">
+              {%- if block.settings.author != blank -%}
+                <span class="oa-social__author">{{ block.settings.author }}</span>
+              {%- endif -%}
+              {%- if block.settings.source != blank -%}
+                <span class="oa-social__source oa-muted">{{ block.settings.source }}</span>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+
+  {%- if has_photos -%}
+    <div class="oa-social__photos">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'photo' -%}
+          <div class="oa-social__photo" {{ block.shopify_attributes }}>
+            {%- if block.settings.image != blank -%}
+              {{
+                block.settings.image
+                | image_url: width: 900
+                | image_tag:
+                  width: block.settings.image.width,
+                  height: block.settings.image.height,
+                  widths: '450, 600, 900',
+                  sizes: '(min-width: 750px) 25vw, 60vw',
+                  loading: 'lazy',
+                  alt: block.settings.image.alt,
+                  class: 'oa-social__photo-img'
+              }}
+            {%- else -%}
+              {{ 'image' | placeholder_svg_tag: 'oa-social__photo-placeholder' }}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .oa-social__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .oa-social__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .oa-social__kicker {
+    margin: 0;
+    color: var(--oa-accent, #f7be18);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .oa-social__heading {
+    margin: 0;
+    max-width: 18ch;
+    font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .oa-social__description {
+    margin: 0;
+    max-width: 48ch;
+    line-height: 1.55;
+  }
+
+  .oa-social__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-block-start: 8px;
+  }
+
+  .oa-social__stat {
+    min-height: 44px;
+    padding-block: 0.5em;
+  }
+
+  .oa-social__stat strong {
+    font-weight: 600;
+  }
+
+  /* Reviews — horizontal snap carousel on mobile, column on desktop */
+  .oa-social__reviews {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-inline: calc(-1 * var(--page-margin, 16px));
+    padding-inline: var(--page-margin, 16px);
+  }
+
+  .oa-social__reviews::-webkit-scrollbar {
+    display: none;
+  }
+
+  .oa-social__review {
+    flex: 0 0 82%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .oa-social__stars {
+    display: inline-flex;
+    gap: 3px;
+    color: var(--oa-accent, #f7be18);
+  }
+
+  .oa-social__star {
+    display: block;
+  }
+
+  .oa-social__quote {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .oa-social__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    margin-block-start: auto;
+  }
+
+  .oa-social__author {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .oa-social__source {
+    font-size: 0.8125rem;
+  }
+
+  /* Photo strip */
+  .oa-social__photos {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-block-start: 32px;
+    margin-inline: calc(-1 * var(--page-margin, 16px));
+    padding-inline: var(--page-margin, 16px);
+  }
+
+  .oa-social__photos::-webkit-scrollbar {
+    display: none;
+  }
+
+  .oa-social__photo {
+    flex: 0 0 60%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--oa-radius-card, 12px);
+    overflow: hidden;
+    scroll-snap-align: start;
+    background: var(--oa-surface-card, #1f1f1f);
+  }
+
+  .oa-social__photo-img,
+  .oa-social__photo-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .oa-social__photo-placeholder svg {
+    width: 100%;
+    height: 100%;
+    fill: var(--oa-text-muted, rgba(255, 255, 255, 0.55));
+  }
+
+  @media screen and (min-width: 990px) {
+    .oa-social__grid {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 64px;
+    }
+
+    .oa-social__intro {
+      flex: 0 0 40%;
+      position: sticky;
+      top: 96px;
+    }
+
+    .oa-social__reviews {
+      flex: 1;
+      flex-direction: column;
+      gap: 16px;
+      overflow-x: visible;
+      scroll-snap-type: none;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    .oa-social__review {
+      flex: 1 1 auto;
+      padding: 24px 28px;
+    }
+
+    .oa-social__photos {
+      margin-block-start: 48px;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow-x: visible;
+    }
+
+    .oa-social__photo {
+      flex: 1 1 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "OA — Dowód społeczny",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Wiarygodność"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Nadtytuł",
+      "default": "OklejAuto"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Nagłówek",
+      "default": "Realny warsztat detailingowy, nie anonimowy sklep"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Opis",
+      "default": "Folie docinamy i kleimy na co dzień — na autach klientów w naszym warsztacie. Te same zestawy, które montujemy u siebie, wysyłamy do Ciebie z instrukcją montażu."
+    },
+    {
+      "type": "header",
+      "content": "Statystyki"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_value",
+      "label": "Statystyka 1 — wartość",
+      "default": "10 lat"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Statystyka 1 — opis",
+      "default": "doświadczenia"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_value",
+      "label": "Statystyka 2 — wartość",
+      "default": "1000+"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Statystyka 2 — opis",
+      "default": "oklejonych aut"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_value",
+      "label": "Statystyka 3 — wartość",
+      "default": "200+"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_label",
+      "label": "Statystyka 3 — opis",
+      "default": "opinii klientów"
+    },
+    {
+      "type": "header",
+      "content": "Wygląd"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Schemat kolorów",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Odstępy"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Góra",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Dół",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Opinia",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Treść opinii",
+          "default": "Folia leży idealnie w każdym zagięciu. Po dwóch miesiącach klamki wyglądają jak w dniu odbioru z salonu."
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Imię autora",
+          "default": "Marcin K."
+        },
+        {
+          "type": "text",
+          "id": "source",
+          "label": "Źródło (opcjonalnie)",
+          "default": "Opinia Google"
+        }
+      ]
+    },
+    {
+      "type": "photo",
+      "name": "Zdjęcie z warsztatu",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Zdjęcie"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "OA — Dowód społeczny",
+      "category": "OklejAuto",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "quote": "Folia leży idealnie w każdym zagięciu. Po dwóch miesiącach klamki wyglądają jak w dniu odbioru z salonu.",
+            "author": "Marcin K.",
+            "source": "Opinia Google"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "quote": "Montaż przy progu bagażnika zajął mi kwadrans. Instrukcja jasna, folia wybacza poprawki na mokro.",
+            "author": "Aleksandra W.",
+            "source": "Opinia Google"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "quote": "Brałem komplet na progi i słupki piano black. Z bliska niewidoczna, a żwir przestał zostawiać ślady.",
+            "author": "Tomasz B.",
+            "source": "Opinia Google"
+          }
+        },
+        {
+          "type": "photo"
+        },
+        {
+          "type": "photo"
+        },
+        {
+          "type": "photo"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

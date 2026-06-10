@@ -1,0 +1,281 @@
+
+
+{%- liquid
+  assign block_settings = block.settings
+-%}
+
+<div
+  class="oa-selling-points spacing-style"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  <ul
+    class="oa-selling-points__list"
+    role="list"
+  >
+    {%- for index in (1..4) -%}
+      {%- liquid
+        assign icon_key = 'icon_' | append: index
+        assign label_key = 'label_' | append: index
+        assign item_icon = block_settings[icon_key]
+        assign item_label = block_settings[label_key]
+      -%}
+      {%- if item_label != blank -%}
+        <li class="oa-selling-points__item oa-pill">
+          {%- if item_icon != 'none' -%}
+            <svg
+              class="oa-selling-points__icon icon-default"
+              aria-hidden="true"
+              focusable="false"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+            >
+              {%- render 'icon', icon: item_icon -%}
+            </svg>
+          {%- endif -%}
+          <span class="oa-selling-points__label">{{ item_label | escape }}</span>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+
+{% stylesheet %}
+  .oa-selling-points {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Mobile first: single scrollable row of glass pills */
+  .oa-selling-points__list {
+    display: flex;
+    gap: var(--gap-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .oa-selling-points__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .oa-selling-points__item {
+    flex: 0 0 auto;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .oa-selling-points__icon {
+    flex-shrink: 0;
+    fill: currentcolor;
+    color: var(--oa-accent);
+  }
+
+  .oa-selling-points__label {
+    color: var(--color-foreground);
+  }
+
+  /* Desktop: wrap into two rows instead of scrolling */
+  @media screen and (min-width: 750px) {
+    .oa-selling-points__list {
+      flex-wrap: wrap;
+      overflow-x: visible;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "OA — Atuty produktu",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Rząd 4 atutów w stylu szklanych pigułek. Na mobile przewijany poziomo."
+    },
+    {
+      "type": "header",
+      "content": "Atut 1"
+    },
+    {
+      "type": "select",
+      "id": "icon_1",
+      "label": "Ikona",
+      "options": [
+        { "value": "none", "label": "Brak" },
+        { "value": "recycle", "label": "Regeneracja" },
+        { "value": "eye", "label": "Oko" },
+        { "value": "stopwatch", "label": "Stoper" },
+        { "value": "check_box", "label": "Potwierdzenie" },
+        { "value": "star", "label": "Gwiazdka" },
+        { "value": "lock", "label": "Kłódka" },
+        { "value": "lightning_bolt", "label": "Błyskawica" },
+        { "value": "snowflake", "label": "Śnieżynka" },
+        { "value": "truck", "label": "Dostawa" },
+        { "value": "return", "label": "Zwrot" },
+        { "value": "heart", "label": "Serce" },
+        { "value": "fire", "label": "Ogień" },
+        { "value": "leaf", "label": "Liść" }
+      ],
+      "default": "recycle"
+    },
+    {
+      "type": "text",
+      "id": "label_1",
+      "label": "Tekst",
+      "default": "Samoregenerująca powłoka"
+    },
+    {
+      "type": "header",
+      "content": "Atut 2"
+    },
+    {
+      "type": "select",
+      "id": "icon_2",
+      "label": "Ikona",
+      "options": [
+        { "value": "none", "label": "Brak" },
+        { "value": "recycle", "label": "Regeneracja" },
+        { "value": "eye", "label": "Oko" },
+        { "value": "stopwatch", "label": "Stoper" },
+        { "value": "check_box", "label": "Potwierdzenie" },
+        { "value": "star", "label": "Gwiazdka" },
+        { "value": "lock", "label": "Kłódka" },
+        { "value": "lightning_bolt", "label": "Błyskawica" },
+        { "value": "snowflake", "label": "Śnieżynka" },
+        { "value": "truck", "label": "Dostawa" },
+        { "value": "return", "label": "Zwrot" },
+        { "value": "heart", "label": "Serce" },
+        { "value": "fire", "label": "Ogień" },
+        { "value": "leaf", "label": "Liść" }
+      ],
+      "default": "eye"
+    },
+    {
+      "type": "text",
+      "id": "label_2",
+      "label": "Tekst",
+      "default": "Niewidoczna ochrona"
+    },
+    {
+      "type": "header",
+      "content": "Atut 3"
+    },
+    {
+      "type": "select",
+      "id": "icon_3",
+      "label": "Ikona",
+      "options": [
+        { "value": "none", "label": "Brak" },
+        { "value": "recycle", "label": "Regeneracja" },
+        { "value": "eye", "label": "Oko" },
+        { "value": "stopwatch", "label": "Stoper" },
+        { "value": "check_box", "label": "Potwierdzenie" },
+        { "value": "star", "label": "Gwiazdka" },
+        { "value": "lock", "label": "Kłódka" },
+        { "value": "lightning_bolt", "label": "Błyskawica" },
+        { "value": "snowflake", "label": "Śnieżynka" },
+        { "value": "truck", "label": "Dostawa" },
+        { "value": "return", "label": "Zwrot" },
+        { "value": "heart", "label": "Serce" },
+        { "value": "fire", "label": "Ogień" },
+        { "value": "leaf", "label": "Liść" }
+      ],
+      "default": "stopwatch"
+    },
+    {
+      "type": "text",
+      "id": "label_3",
+      "label": "Tekst",
+      "default": "Montaż samodzielny w kilka minut"
+    },
+    {
+      "type": "header",
+      "content": "Atut 4"
+    },
+    {
+      "type": "select",
+      "id": "icon_4",
+      "label": "Ikona",
+      "options": [
+        { "value": "none", "label": "Brak" },
+        { "value": "recycle", "label": "Regeneracja" },
+        { "value": "eye", "label": "Oko" },
+        { "value": "stopwatch", "label": "Stoper" },
+        { "value": "check_box", "label": "Potwierdzenie" },
+        { "value": "star", "label": "Gwiazdka" },
+        { "value": "lock", "label": "Kłódka" },
+        { "value": "lightning_bolt", "label": "Błyskawica" },
+        { "value": "snowflake", "label": "Śnieżynka" },
+        { "value": "truck", "label": "Dostawa" },
+        { "value": "return", "label": "Zwrot" },
+        { "value": "heart", "label": "Serce" },
+        { "value": "fire", "label": "Ogień" },
+        { "value": "leaf", "label": "Liść" }
+      ],
+      "default": "check_box"
+    },
+    {
+      "type": "text",
+      "id": "label_4",
+      "label": "Tekst",
+      "default": "Gwarancja trwałości"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "OA — Atuty produktu",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

@@ -124,4 +124,42 @@
       display: none;
     }
   }
+
+  /*
+   * OklejAuto fleet-card skin (DESIGN-CONTRACT.md, ref: LuxxCar fleet cards).
+   * Shared by every product-card surface: collection grid + home carousel.
+   * Tokens come from custom-theme.css :root (--oa-*), with safe fallbacks.
+   * Editor settings (inline custom properties) still resolve first where
+   * the skin reads var(--color, ...) — no !important anywhere.
+   */
+  .product-card .product-card__content {
+    background-color: var(--oa-surface-card, #1f1f1f);
+    border-radius: var(--oa-radius-card, 12px);
+  }
+
+  /* Inset media panel with its own, slightly tighter radius.
+     .card-gallery keeps its own overflow: hidden, so the global
+     subtle-zoom hover (transform: scale on .card-gallery) stays clipped. */
+  .product-card .card-gallery {
+    margin: 8px 8px 0;
+    border-radius: calc(var(--oa-radius-card, 12px) - 4px);
+  }
+
+  /* Title: white, larger, medium weight (~22px desktop, ~17px on 2-col mobile) */
+  .product-card .text-block.h5 > * {
+    font-size: clamp(1.0625rem, 0.92rem + 0.62vw, 1.375rem);
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  /* Supporting meta lines: muted unless the block sets an explicit color */
+  .product-card :is(div, rte-formatter).text-block:not(.h5) {
+    color: var(--color, var(--oa-text-muted, rgb(255 255 255 / 0.55)));
+    font-size: 0.8125rem;
+  }
+
+  /* Price row: prominent */
+  .product-card product-price {
+    font-weight: 600;
+  }
 {% endstylesheet %}

@@ -1,0 +1,364 @@
+
+
+{%- doc -%}
+  OklejAuto bundle tier selector.
+
+  Renders radio tap-tiles: tile 1 is the current element product on its own,
+  tiles 2+ are "Pakiet" bundle products referenced by the product metafield
+  `oa.pakiety` (type: list.product_reference).
+
+  Savings convention: the client sets each pakiet's compare_at_price to the
+  sum of its element prices, so the "Oszczędzasz X" badge is computed as
+  compare_at_price - price. No compare_at_price -> no badge.
+
+  Selecting a pakiet tile swaps the variant id submitted by the section's
+  product form (hidden input[name="id"]), so the vehicle line-item properties
+  ride along no matter which product is added. Tile 1 ("Sam element") never
+  bakes a variant id — it hands control back to the theme's native variant
+  flow (variant-picker + product-form own the input and the price block).
+  Logic: assets/oa-bundle-tier-selector.js
+
+  Graceful degradation: metafield empty/missing -> the block renders nothing
+  (a setup hint is shown in the theme editor only) and the plain ATC works.
+{%- enddoc -%}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign current_variant = product.selected_or_first_available_variant
+  assign pakiety = product.metafields.oa.pakiety.value
+  assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id
+  assign radio_group_name = 'oa-tier-' | append: block.id
+-%}
+
+{%- if product != blank and pakiety != blank -%}
+  <oa-bundle-tier-selector
+    class="oa-tier-selector spacing-style"
+    style="{% render 'spacing-style', settings: block_settings %}"
+    data-section-id="{{ section.id }}"
+    data-block-id="{{ block.id }}"
+    data-product-form-id="{{ product_form_id }}"
+    data-vehicle-keys="{{ block_settings.vehicle_keys | escape }}"
+    data-attribute-key="{{ block_settings.attribute_key | default: 'vehicle' | escape }}"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block_settings.heading != blank -%}
+      <p
+        class="oa-tier-selector__heading"
+        id="OaTierHeading-{{ block.id }}"
+      >
+        {{ block_settings.heading | escape }}
+      </p>
+    {%- endif -%}
+
+    <div
+      class="oa-tier-selector__group"
+      role="radiogroup"
+      {% if block_settings.heading != blank %}
+        aria-labelledby="OaTierHeading-{{ block.id }}"
+      {% else %}
+        aria-label="Wybierz zakres ochrony"
+      {% endif %}
+    >
+      <label class="oa-tier oa-glass">
+        {%- comment -%}
+          No value attribute on purpose: tile 1 does not own a variant id.
+          The JS restores the theme-maintained variant id when it's selected.
+        {%- endcomment -%}
+        <input
+          type="radio"
+          class="oa-tier__input visually-hidden"
+          name="{{ radio_group_name }}"
+          data-tier="current"
+          checked
+          on:change="/handleTierChange"
+        >
+        <span class="oa-tier__body">
+          <span class="oa-tier__name">{{ block_settings.current_label | escape }}</span>
+          <span class="oa-tier__sub oa-muted">{{ product.title | escape }}</span>
+        </span>
+        <span class="oa-tier__meta">
+          <span class="oa-tier__price" data-tier-price="current">{{ current_variant.price | money }}</span>
+        </span>
+      </label>
+
+      {%- for pakiet in pakiety -%}
+        {%- liquid
+          assign pakiet_variant = pakiet.selected_or_first_available_variant
+          if pakiet_variant == blank
+            continue
+          endif
+
+          assign savings = 0
+          if pakiet_variant.compare_at_price > pakiet_variant.price
+            assign savings = pakiet_variant.compare_at_price | minus: pakiet_variant.price
+          endif
+
+          assign pakiet_subtitle = pakiet.metafields.descriptors.subtitle.value
+        -%}
+        <label class="oa-tier oa-glass{% unless pakiet_variant.available %} oa-tier--unavailable{% endunless %}">
+          <input
+            type="radio"
+            class="oa-tier__input visually-hidden"
+            name="{{ radio_group_name }}"
+            value="{{ pakiet_variant.id }}"
+            data-tier="pakiet"
+            {% unless pakiet_variant.available %}
+              disabled
+            {% endunless %}
+            on:change="/handleTierChange"
+          >
+          <span class="oa-tier__body">
+            <span class="oa-tier__name">{{ pakiet.title | escape }}</span>
+            {%- if pakiet_subtitle != blank -%}
+              <span class="oa-tier__sub oa-muted">{{ pakiet_subtitle | escape }}</span>
+            {%- endif -%}
+          </span>
+          <span class="oa-tier__meta">
+            {%- if savings > 0 -%}
+              <span class="oa-tier__badge">{{ block_settings.savings_prefix | escape }} {{ savings | money }}</span>
+            {%- endif -%}
+            {%- unless pakiet_variant.available -%}
+              <span class="oa-tier__badge oa-tier__badge--unavailable">Chwilowo niedostępny</span>
+            {%- endunless -%}
+            <span class="oa-tier__price">{{ pakiet_variant.price | money }}</span>
+          </span>
+        </label>
+
+        {%- comment -%}
+          Server-rendered price markup per pakiet. The JS clones only the
+          CHILDREN of the snippet's [ref="priceContainer"] wrapper into the
+          live price container — the DOM must never hold two priceContainer refs.
+        {%- endcomment -%}
+        <template data-variant-id="{{ pakiet_variant.id }}">
+          {%- render 'price', product_resource: pakiet, show_sale_price_first: true -%}
+        </template>
+      {%- endfor -%}
+    </div>
+  </oa-bundle-tier-selector>
+
+  <script
+    src="{{ 'oa-bundle-tier-selector.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{%- elsif request.design_mode -%}
+  <div
+    class="oa-tier-selector__editor-hint oa-muted"
+    {{ block.shopify_attributes }}
+  >
+    Selektor pakietów: dodaj do produktu metafield „oa.pakiety” (lista produktów), aby pokazać kafelki pakietów. Bez metafielda blok nie renderuje niczego, a zwykły przycisk „Dodaj do koszyka” działa normalnie.
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .oa-tier-selector {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .oa-tier-selector__heading {
+    margin-block: 0 var(--padding-sm);
+    margin-inline: 0;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .oa-tier-selector__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+
+  .oa-tier {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-md);
+    min-height: 44px;
+    padding: var(--padding-md) var(--padding-lg);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .oa-tier:hover {
+    border-color: rgb(255 255 255 / 0.3);
+  }
+
+  /* Selected: white border + subtle gold ring */
+  .oa-tier:has(.oa-tier__input:checked) {
+    border-color: var(--color-foreground);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--oa-accent) 22%, transparent);
+  }
+
+  .oa-tier:has(.oa-tier__input:focus-visible) {
+    outline: var(--focus-outline-width) solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  .oa-tier--unavailable {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .oa-tier__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .oa-tier__name {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .oa-tier__sub {
+    font-size: 0.8125rem;
+  }
+
+  .oa-tier__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--gap-xs);
+    flex-shrink: 0;
+  }
+
+  .oa-tier__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2em 0.7em;
+    background: color-mix(in srgb, var(--oa-accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--oa-accent) 40%, transparent);
+    border-radius: var(--oa-radius-pill);
+    color: var(--oa-accent);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .oa-tier__badge--unavailable {
+    background: var(--oa-surface-glass);
+    border-color: var(--oa-border-glass);
+    color: var(--oa-text-muted);
+  }
+
+  .oa-tier__price {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .oa-tier-selector__editor-hint {
+    font-size: 0.8125rem;
+  }
+
+  /* Desktop refinement: badge and price share one row */
+  @media screen and (min-width: 750px) {
+    .oa-tier__meta {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--gap-sm);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "OA — Wybór pakietu",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Kafelki pakietów ładowane z metafielda produktu „oa.pakiety” (lista produktów). Oszczędność = cena porównawcza pakietu minus cena (cena porównawcza pakietu = suma cen elementów, ustawiana ręcznie)."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Nagłówek",
+      "default": "Wybierz zakres ochrony"
+    },
+    {
+      "type": "text",
+      "id": "current_label",
+      "label": "Etykieta pojedynczego elementu",
+      "default": "Sam element"
+    },
+    {
+      "type": "text",
+      "id": "savings_prefix",
+      "label": "Tekst przed kwotą oszczędności",
+      "default": "Oszczędzasz"
+    },
+    {
+      "type": "header",
+      "content": "Atrybut koszyka (pojazd)"
+    },
+    {
+      "type": "text",
+      "id": "vehicle_keys",
+      "label": "Klucze pól pojazdu (po przecinku)",
+      "default": "Marka,Model,Rocznik,Wersja / nadwozie",
+      "info": "Muszą odpowiadać kluczom (property key) bloków „Pole własne produktu”. Po dodaniu do koszyka wartości są łączone spacją i zapisywane jako atrybut koszyka."
+    },
+    {
+      "type": "text",
+      "id": "attribute_key",
+      "label": "Klucz atrybutu koszyka",
+      "default": "vehicle"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "OA — Wybór pakietu",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

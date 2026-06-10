@@ -51,6 +51,8 @@ Grid of 7 elementów only. Fleet-card style, 2-col mobile / 3-col desktop. No fi
 
 Optional (decide on preview): sticky bottom ATC bar — default off.
 
+Accelerated checkout ukryty na PDP — wymusza przejście przez wymagane pola pojazdu (express checkout pozostaje dostępny w koszyku/checkout).
+
 ## Design tokens (LuxxCar → Savor)
 
 | Token | Value |

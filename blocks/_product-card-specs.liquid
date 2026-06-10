@@ -1,0 +1,56 @@
+{%- doc -%}
+  OklejAuto: renders the first product tags as muted spec pills on the product card
+  (LuxxCar fleet-card meta row, DESIGN-CONTRACT.md). Uses the global .oa-pill /
+  .oa-muted primitives from custom-theme.css. Renders nothing for placeholder
+  products or products without tags, so it is safe in empty/onboarding states.
+{%- enddoc -%}
+
+{% liquid
+  assign product = closest.product
+  assign max_pills = block.settings.max_pills | default: 3
+%}
+
+{% if product != blank and product.tags.size > 0 %}
+  <div class="product-card-specs" {{ block.shopify_attributes }}>
+    {% for tag in product.tags limit: max_pills %}
+      <span class="oa-pill oa-muted">{{ tag | escape }}</span>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% stylesheet %}
+  .product-card-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-block-start: 2px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Cechy (pigułki)",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Wyświetla pierwsze tagi produktu jako wyciszone pigułki specyfikacji."
+    },
+    {
+      "type": "range",
+      "id": "max_pills",
+      "label": "Maksymalna liczba pigułek",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cechy (pigułki)",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

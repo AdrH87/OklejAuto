@@ -1,0 +1,446 @@
+{% liquid
+  assign show_comparison = section.settings.show_comparison
+%}
+
+{% if show_comparison %}
+  <script
+    src="{{ 'comparison-slider.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="oa-pain section section--page-width color-{{ section.settings.color_scheme }} spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+  <div class="oa-pain__header">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="oa-pain__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.subheading != blank -%}
+      <p class="oa-pain__subheading oa-muted">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+  </div>
+
+  {%- if section.blocks.size > 0 -%}
+    <div class="oa-pain__grid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'pain_card' -%}
+          <div class="oa-pain__card" {{ block.shopify_attributes }}>
+            <div class="oa-pain__card-media">
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 900
+                  | image_tag:
+                    width: block.settings.image.width,
+                    height: block.settings.image.height,
+                    widths: '450, 600, 900',
+                    sizes: '(min-width: 750px) 33vw, 50vw',
+                    loading: 'lazy',
+                    alt: block.settings.image.alt,
+                    class: 'oa-pain__card-img'
+                }}
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'oa-pain__card-placeholder' }}
+              {%- endif -%}
+            </div>
+
+            <div class="oa-pain__card-body">
+              {%- if block.settings.label != blank -%}
+                <h3 class="oa-pain__card-label">{{ block.settings.label }}</h3>
+              {%- endif -%}
+              {%- if block.settings.description != blank -%}
+                <p class="oa-pain__card-description oa-muted">{{ block.settings.description }}</p>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  {%- if show_comparison -%}
+    <div class="oa-pain__comparison">
+      <comparison-slider-component
+        class="comparison-slider comparison-slider--horizontal oa-pain__comparison-slider"
+        style="--ratio: 16 / 9; --text-background-color: rgb(17 17 17 / 0.7); --text-corner-radius: 99px;"
+      >
+        <div class="comparison-slider__container">
+          <div
+            class="comparison-slider__media-wrapper"
+            ref="mediaWrapper"
+            data-comparison-slider
+            data-orientation="horizontal"
+            data-text-position="end"
+          >
+            <div class="comparison-slider__layer comparison-slider__layer--before">
+              {%- if section.settings.comparison_before_image != blank -%}
+                {{
+                  section.settings.comparison_before_image
+                  | image_url: width: 1920
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'before-image',
+                    alt: section.settings.comparison_before_image.alt,
+                    sizes: 'auto, 100vw',
+                    width: section.settings.comparison_before_image.width,
+                    height: section.settings.comparison_before_image.height,
+                    ref: 'beforeImage'
+                }}
+              {%- else -%}
+                <div class="comparison-slider__placeholder before-image" ref="beforeImage">
+                  {{ 'image' | placeholder_svg_tag }}
+                </div>
+              {%- endif -%}
+
+              {%- if section.settings.comparison_before_label != blank -%}
+                <div class="comparison-slider__text comparison-slider__text--before comparison-slider__text--with-bg">
+                  <div class="h6">{{ section.settings.comparison_before_label }}</div>
+                </div>
+              {%- endif -%}
+            </div>
+
+            <div class="comparison-slider__layer comparison-slider__layer--after">
+              {%- if section.settings.comparison_after_image != blank -%}
+                {{
+                  section.settings.comparison_after_image
+                  | image_url: width: 1920
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'after-image',
+                    alt: section.settings.comparison_after_image.alt,
+                    sizes: 'auto, 100vw',
+                    width: section.settings.comparison_after_image.width,
+                    height: section.settings.comparison_after_image.height,
+                    ref: 'afterImage'
+                }}
+              {%- else -%}
+                <div class="comparison-slider__placeholder after-image" ref="afterImage">
+                  {{ 'image' | placeholder_svg_tag }}
+                </div>
+              {%- endif -%}
+
+              {%- if section.settings.comparison_after_label != blank -%}
+                <div class="comparison-slider__text comparison-slider__text--after comparison-slider__text--with-bg">
+                  <div class="h6">{{ section.settings.comparison_after_label }}</div>
+                </div>
+              {%- endif -%}
+            </div>
+
+            <div class="cs-slider__handle">
+              <span class="cs-slider__chevron">
+                {{- 'icon-chevron-left.svg' | inline_asset_content -}}
+              </span>
+              <span class="cs-slider__chevron">
+                {{- 'icon-chevron-right.svg' | inline_asset_content -}}
+              </span>
+            </div>
+
+            <input
+              type="range"
+              class="cs-slider"
+              ref="slider"
+              min="0"
+              max="100"
+              value="50"
+              aria-label="{{ 'blocks.slider_label' | t }}"
+              on:input="/sync"
+              on:pointerdown="/sync"
+            >
+          </div>
+        </div>
+      </comparison-slider-component>
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .oa-pain__header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-block-end: 28px;
+  }
+
+  .oa-pain__heading {
+    margin: 0;
+    max-width: 20ch;
+    font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .oa-pain__subheading {
+    margin: 0;
+    max-width: 52ch;
+    line-height: 1.55;
+  }
+
+  .oa-pain__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .oa-pain__card {
+    display: flex;
+    flex-direction: column;
+    background: var(--oa-surface-card, #1f1f1f);
+    border-radius: var(--oa-radius-card, 12px);
+    overflow: hidden;
+  }
+
+  .oa-pain__card-media {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .oa-pain__card-img,
+  .oa-pain__card-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .oa-pain__card-placeholder svg {
+    width: 100%;
+    height: 100%;
+    fill: var(--oa-text-muted, rgba(255, 255, 255, 0.55));
+  }
+
+  .oa-pain__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 16px;
+  }
+
+  .oa-pain__card-label {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .oa-pain__card-description {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  .oa-pain__comparison {
+    margin-block-start: 28px;
+  }
+
+  .oa-pain__comparison-slider {
+    border-radius: var(--oa-radius-card, 12px);
+    overflow: hidden;
+  }
+
+  @media screen and (min-width: 750px) {
+    .oa-pain__header {
+      margin-block-end: 36px;
+    }
+
+    .oa-pain__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .oa-pain__card-body {
+      gap: 6px;
+      padding: 16px 18px 20px;
+    }
+
+    .oa-pain__card-label {
+      font-size: 1.0625rem;
+    }
+
+    .oa-pain__card-description {
+      font-size: 0.875rem;
+    }
+
+    .oa-pain__comparison {
+      margin-block-start: 40px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "OA — Newralgiczne miejsca",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Treść"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Nagłówek",
+      "default": "Te miejsca niszczą się pierwsze"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Tekst pod nagłówkiem",
+      "default": "Codzienna eksploatacja zostawia ślady zawsze w tych samych punktach. Dokładnie je znamy — i dokładnie pod nie docinamy folie."
+    },
+    {
+      "type": "header",
+      "content": "Porównanie przed / po"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_comparison",
+      "label": "Pokaż suwak przed / po",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "comparison_before_image",
+      "label": "Zdjęcie „przed”",
+      "visible_if": "{{ section.settings.show_comparison }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "comparison_after_image",
+      "label": "Zdjęcie „po”",
+      "visible_if": "{{ section.settings.show_comparison }}"
+    },
+    {
+      "type": "text",
+      "id": "comparison_before_label",
+      "label": "Etykieta „przed”",
+      "default": "Bez folii",
+      "visible_if": "{{ section.settings.show_comparison }}"
+    },
+    {
+      "type": "text",
+      "id": "comparison_after_label",
+      "label": "Etykieta „po”",
+      "default": "Z folią",
+      "visible_if": "{{ section.settings.show_comparison }}"
+    },
+    {
+      "type": "header",
+      "content": "Wygląd"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Schemat kolorów",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Odstępy"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Góra",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Dół",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "pain_card",
+      "name": "Newralgiczne miejsce",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Zdjęcie"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Nazwa miejsca",
+          "default": "Wnęki klamek"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Opis (jedna linia)",
+          "default": "Paznokcie i kluczyki zostawiają rysy już po kilku tygodniach."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "OA — Newralgiczne miejsca",
+      "category": "OklejAuto",
+      "blocks": [
+        {
+          "type": "pain_card",
+          "settings": {
+            "label": "Wnęki klamek",
+            "description": "Paznokcie i kluczyki zostawiają rysy już po kilku tygodniach."
+          }
+        },
+        {
+          "type": "pain_card",
+          "settings": {
+            "label": "Progi drzwi",
+            "description": "Buty i żwir ścierają lakier przy każdym wsiadaniu."
+          }
+        },
+        {
+          "type": "pain_card",
+          "settings": {
+            "label": "Słupki piano black",
+            "description": "Mikrorysy z myjni widać na nich najszybciej."
+          }
+        },
+        {
+          "type": "pain_card",
+          "settings": {
+            "label": "Próg bagażnika",
+            "description": "Ładowanie zakupów i walizek rysuje krawędź zderzaka."
+          }
+        },
+        {
+          "type": "pain_card",
+          "settings": {
+            "label": "Lampy przednie",
+            "description": "Piaskowanie z drogi z czasem matowi klosze."
+          }
+        },
+        {
+          "type": "pain_card",
+          "settings": {
+            "label": "Ekran multimediów",
+            "description": "Odciski palców i mikrorysy po każdym dotknięciu."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

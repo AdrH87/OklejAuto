@@ -13,7 +13,7 @@
       "blocks": {
         "text_tqQTNE": {
           "type": "text",
-          "name": "Title",
+          "name": "Tytuł kolekcji",
           "settings": {
             "text": "<h1>{{ closest.collection.title }}</h1>",
             "width": "100%",
@@ -30,9 +30,9 @@
             "background": false,
             "background_color": "#00000026",
             "corner_radius": 0,
-            "padding-block-start": 100,
+            "padding-block-start": 0,
             "padding-block-end": 0,
-            "padding-inline-start": 40,
+            "padding-inline-start": 0,
             "padding-inline-end": 0
           },
           "blocks": {}
@@ -41,9 +41,9 @@
       "block_order": [
         "text_tqQTNE"
       ],
-      "name": "Collection heading",
+      "name": "Nagłówek kolekcji",
       "settings": {
-        "content_direction": "row",
+        "content_direction": "column",
         "vertical_on_mobile": true,
         "horizontal_alignment": "flex-start",
         "vertical_alignment": "center",
@@ -51,23 +51,23 @@
         "horizontal_alignment_flex_direction_column": "flex-start",
         "vertical_alignment_flex_direction_column": "center",
         "gap": 12,
-        "section_width": "full-width",
+        "section_width": "page-width",
         "section_height": "",
         "section_height_custom": 50,
-        "color_scheme": "scheme-5",
-        "background_media": "image",
+        "color_scheme": "scheme-1",
+        "background_media": "none",
         "video_position": "cover",
         "background_image_position": "cover",
         "border": "none",
         "border_width": 1,
         "border_opacity": 100,
         "border_radius": 0,
-        "toggle_overlay": true,
+        "toggle_overlay": false,
         "overlay_color": "#00000061",
         "overlay_style": "solid",
         "gradient_direction": "to top",
         "padding-block-start": 100,
-        "padding-block-end": 32
+        "padding-block-end": 24
       }
     },
     "main": {
@@ -77,20 +77,20 @@
           "type": "filters",
           "static": true,
           "settings": {
-            "enable_filtering": true,
+            "enable_filtering": false,
             "filter_style": "horizontal",
             "filter_width": "full-width",
             "text_label_case": "default",
             "show_swatch_label": false,
             "show_filter_label": false,
-            "enable_sorting": true,
+            "enable_sorting": false,
             "enable_grid_density": false,
-            "inherit_color_scheme": false,
-            "color_scheme": "scheme-4",
-            "padding-block-start": 8,
-            "padding-block-end": 8,
-            "padding-inline-start": 40,
-            "padding-inline-end": 40,
+            "inherit_color_scheme": true,
+            "color_scheme": "scheme-1",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
             "facets_margin_bottom": 0,
             "facets_margin_right": 0
           },
@@ -271,11 +271,11 @@
                     "align_baseline": false,
                     "horizontal_alignment_flex_direction_column": "flex-start",
                     "vertical_alignment_flex_direction_column": "flex-start",
-                    "gap": 12,
-                    "width": "fit-content",
+                    "gap": 8,
+                    "width": "fill",
                     "custom_width": 100,
                     "width_mobile": "fill",
-                    "custom_width_mobile": 25,
+                    "custom_width_mobile": 100,
                     "height": "fit",
                     "custom_height": 100,
                     "inherit_color_scheme": true,
@@ -322,10 +322,18 @@
                         "padding-inline-end": 0
                       },
                       "blocks": {}
+                    },
+                    "specs_pills_K3nW9a": {
+                      "type": "_product-card-specs",
+                      "settings": {
+                        "max_pills": 3
+                      },
+                      "blocks": {}
                     }
                   },
                   "block_order": [
-                    "text_yYkK7E"
+                    "text_yYkK7E",
+                    "specs_pills_K3nW9a"
                   ]
                 }
               },
@@ -345,15 +353,16 @@
         "layout_type": "grid",
         "product_card_size": "large",
         "mobile_product_card_size": "small",
-        "product_grid_width": "full-width",
-        "full_width_on_mobile": true,
-        "columns_gap_horizontal": 1,
-        "columns_gap_vertical": 1,
+        "enable_infinite_scroll": true,
+        "product_grid_width": "centered",
+        "full_width_on_mobile": false,
+        "columns_gap_horizontal": 16,
+        "columns_gap_vertical": 16,
         "padding-inline-start": 0,
         "padding-inline-end": 0,
-        "color_scheme": "",
+        "color_scheme": "scheme-1",
         "padding-block-start": 0,
-        "padding-block-end": 1
+        "padding-block-end": 64
       }
     }
   },
