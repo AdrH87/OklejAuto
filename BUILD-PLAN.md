@@ -1,4 +1,4 @@
-# OklejAuto — PPF Store Theme Build (Savor → LuxxCar vibe)
+﻿# OklejAuto — PPF Store Theme Build (Savor → LuxxCar vibe)
 
 ## Context
 
@@ -104,7 +104,7 @@ All copy **Polish**. Zero `!important` — CSS vars + specificity.
 
 **DONE (committed, pushed, synced to OklejAuto/main #203213701406 — hash-verified):**
 - Phase 0-1: contract docs, dark design system (schemes/radii/typography + custom-theme.css + Golos Text latin-ext via Google Fonts)
-- Phase 2 PDP: 4x vehicle inputs (properties[Marka/Model/Rocznik/Wersja]), oa-bundle-tier-selector (metafield oa.pakiety, savings z compare_at), oa-selling-points, FAQ, delivery line; accelerated checkout disabled na PDP
+- Phase 2 PDP: 4x vehicle inputs (properties[Marka/Model/Rocznik/Wersja]), oa-bundle-tier-selector (metafield oklejauto.pakiety, savings z compare_at), oa-selling-points, FAQ, delivery line; accelerated checkout disabled na PDP
 - Phase 3 Home: oa-video-hero / oa-social-proof / oa-pain-education / karuzela (collection: elementy) / oa-faq
 - Phase 4 Collection: fleet-card skin (shared z karuzelą), spec pills z tagów, 2-col/3-col
 - Review loop: integration clean + adversarial review (2 CRITICAL + 1 HIGH fixed, re-review APPROVED). Theme check 0 offenses.
@@ -112,11 +112,11 @@ All copy **Polish**. Zero `!important` — CSS vars + specificity.
 **BLOCKED — Adrian:**
 1. Storefront password (admin → Online Store → Preferences) → odblokowuje `shopify theme dev` + screenshoty 375/1440
 2. `shopify store auth --store test-z4rrgor8.myshopify.com --scopes read_products,write_products` — kliknąć approve w przeglądarce → odblokowuje dummy products
-3. Pakiet 1/2/3: skład + ceny (potrzebne do metafield oa.pakiety + compare_at = suma części)
+3. Pakiet 1/2/3: skład + ceny (potrzebne do metafield oklejauto.pakiety + compare_at = suma części)
 4. Assety: hero video, zdjęcia elementów/stref, opinie, liczby do stat chips
 
 **NEXT (po odblokowaniu):**
-1. Dummy products (2 elementy + 1 pakiet) + metafield oa.pakiety + collection "elementy"
+1. Dummy products (2 elementy + 1 pakiet) + metafield oklejauto.pakiety + collection "elementy"
 2. Render 375px + 1440px → screenshoty → approval Adriana (visual gate)
 3. Verify na żywo: disabled accelerated-checkout faktycznie znika (platform-runtime caveat z review), tier selector E2E (properties w /cart.js)
 4. Store language → PL (theme ma locales/pl.json), nav menu (Sklep), strona /collections/elementy

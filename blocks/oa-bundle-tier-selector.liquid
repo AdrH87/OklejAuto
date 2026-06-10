@@ -1,11 +1,11 @@
-
+﻿
 
 {%- doc -%}
   OklejAuto bundle tier selector.
 
   Renders radio tap-tiles: tile 1 is the current element product on its own,
   tiles 2+ are "Pakiet" bundle products referenced by the product metafield
-  `oa.pakiety` (type: list.product_reference).
+  `oklejauto.pakiety` (type: list.product_reference).
 
   Savings convention: the client sets each pakiet's compare_at_price to the
   sum of its element prices, so the "Oszczędzasz X" badge is computed as
@@ -30,7 +30,7 @@
   endif
 
   assign current_variant = product.selected_or_first_available_variant
-  assign pakiety = product.metafields.oa.pakiety.value
+  assign pakiety = product.metafields.oklejauto.pakiety.value
   assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id
   assign radio_group_name = 'oa-tier-' | append: block.id
 -%}
@@ -151,7 +151,7 @@
     class="oa-tier-selector__editor-hint oa-muted"
     {{ block.shopify_attributes }}
   >
-    Selektor pakietów: dodaj do produktu metafield „oa.pakiety” (lista produktów), aby pokazać kafelki pakietów. Bez metafielda blok nie renderuje niczego, a zwykły przycisk „Dodaj do koszyka” działa normalnie.
+    Selektor pakietów: dodaj do produktu metafield „oklejauto.pakiety” (lista produktów), aby pokazać kafelki pakietów. Bez metafielda blok nie renderuje niczego, a zwykły przycisk „Dodaj do koszyka” działa normalnie.
   </div>
 {%- endif -%}
 
@@ -272,7 +272,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Kafelki pakietów ładowane z metafielda produktu „oa.pakiety” (lista produktów). Oszczędność = cena porównawcza pakietu minus cena (cena porównawcza pakietu = suma cen elementów, ustawiana ręcznie)."
+      "content": "Kafelki pakietów ładowane z metafielda produktu „oklejauto.pakiety” (lista produktów). Oszczędność = cena porównawcza pakietu minus cena (cena porównawcza pakietu = suma cen elementów, ustawiana ręcznie)."
     },
     {
       "type": "text",

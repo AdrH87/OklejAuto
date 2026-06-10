@@ -1,4 +1,4 @@
-# OklejAuto — Design Contract
+﻿# OklejAuto — Design Contract
 
 Source of truth for design + structure decisions. Grilled & locked with Adrian 2026-06-10.
 Reference: https://luxxcar.framer.website/ (tokens extracted from computed styles, desktop 1440 + mobile 375).
