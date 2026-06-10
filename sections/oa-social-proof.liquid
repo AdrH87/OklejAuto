@@ -192,6 +192,8 @@
   /* Logo marquee — seamless strip (pattern: Videografia "Zaufali nam") */
   .oa-social__marquee-wrap {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -392,6 +394,10 @@
 
     .oa-social__intro {
       flex: 0 0 40%;
+      /* min-width: 0 overrides the flex default of min-width: auto — without it
+         the marquee track's max-content width blows the column out to ~full page
+         and crushes the reviews column to min-content */
+      min-width: 0;
       position: sticky;
       top: 96px;
     }
