@@ -129,7 +129,7 @@ All copy **Polish**. Zero `!important` — CSS vars + specificity.
 - 3 tiery: **1 / 2 / 4 elementy**; przy 2/4 klient sam wybiera elementy (chips z kolekcji `elementy` — 7 produktów)
 - Multi-add: jeden submit → `/cart/add.js` z `items[]` (główny produkt + wybrane chipsy); vehicle properties + cart attribute ride along
 - Rabaty przez **automatic discounts** (2+ → 10%, 4+ → 20%). PDP liczy cenę poglądowo ("Z rabatem"), źródłem prawdy jest discount naliczany w koszyku
-- **UWAGA — discounts NIE utworzone:** brak `write_discounts` w CLI auth. Pliki gotowe w `c:\tmp\oklej-gql`: `discount-create.graphql` + `vars-discount-2plus.json` / `vars-discount-4plus.json` — odpalić po doauthowaniu
+- **Discounts UTWORZONE i zweryfikowane E2E (2026-06-11, po re-auth z `write_discounts`):** "Pakiet 2+ elementy" #1744927654174 (min qty 2, −10%) i "Pakiet 4+ elementy" #1744927686942 (min qty 4, −20%), oba ACTIVE, kolekcja `elementy`, combinesWith all false (przy 4+ Shopify aplikuje korzystniejszy — potwierdzone w koszyku). Cart E2E: tier 2 → $178.20, tier 4 → $324.80 — co do centa zgodne z preview na ATC. Zmiana % = admin (Discounts) ORAZ settings bloku w edytorze (muszą matchować)
 - Pakiet 1/2/3: produkty **ARCHIVED**; stary kontrakt `oklejauto.pakiety` + compare_at retired (patrz DESIGN-CONTRACT.md)
 - Kolekcja `elementy`: 7 elementów
 
@@ -142,12 +142,9 @@ All copy **Polish**. Zero `!important` — CSS vars + specificity.
 - Finalny order: `main → oa_process_steps → oa_extended_content_slot → oa_content_why → oa_content_care`
 - Header: transparent off na product/collection
 
-**BLOCKED — Adrian (aktualizacja):**
-1. Storefront password → `shopify theme dev` + screenshoty 375/1440 (bez zmian)
-2. CLI auth ze scope `write_discounts` → utworzenie 2 automatic discounts z `c:\tmp\oklej-gql`
-3. Assety: hero video, klipy montażowe do oa-process-steps, zdjęcia do sekcji media-with-content, opinie
+**BLOCKED — Adrian (aktualizacja 2026-06-11):**
+1. Werdykt wizualny iteracji 3 (screenshoty `it3-*` w `.gstack-review/screenshots/`)
+2. Assety: hero video, klipy montażowe do oa-process-steps (4 kroki), zdjęcia do sekcji media-with-content, zdjęcia produktowe, logotypy marquee, opinie
+3. Realne ceny elementów + finalne % rabatów (teraz placeholdery 10/20)
 
-**NEXT:**
-1. Automatic discounts (2+/4+) — bez nich rabat z PDP nie naliczy się w koszyku (PDP = preview)
-2. Render 375/1440 → screenshoty → visual gate Adriana
-3. E2E builder v2: multi-add `items[]` w `/cart.js` + atrybut `vehicle` + naliczenie discountu w koszyku
+**DONE (2026-06-11 noc):** discounts utworzone + cart E2E PASS (tier 2/4, rabaty naliczone, lepszy wygrywa); multi-add z properties na każdej linii; validation gate; real-input click; screenshoty 375/1440 w repo.
