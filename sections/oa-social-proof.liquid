@@ -166,6 +166,10 @@
 
   .oa-social__kicker {
     margin: 0;
+    /* Halve the kicker -> headline gap: the intro's flex gap is 16px, so a
+       -8px bottom margin nets an 8px gap above the headline (heading ->
+       description below keeps the full 16px). */
+    margin-block-end: -8px;
     color: var(--oa-accent, #f7be18);
     font-size: 0.8125rem;
     font-weight: 600;
@@ -175,12 +179,20 @@
 
   .oa-social__heading {
     margin: 0;
-    max-width: 18ch;
-    font-size: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+    /* Wide enough to balance onto TWO lines instead of three. */
+    max-width: 42ch;
+    font-size: clamp(1.25rem, 2.5vw + 1rem, 2.75rem);
     font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
     text-wrap: balance;
+  }
+
+  /* Phones: smaller floor so the headline holds two lines, not three. */
+  @media screen and (max-width: 749px) {
+    .oa-social__heading {
+      font-size: 1.25rem;
+    }
   }
 
   .oa-social__description {
