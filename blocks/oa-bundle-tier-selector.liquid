@@ -570,9 +570,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--oa-border-glass);
+    width: 20px;
+    height: 20px;
+    /* Border transparent by default: unchecked chips show NO empty white box —
+       only the gold filled box appears once the chip is selected (rule below).
+       Size 20px (was 18) gives the 12px tick +1px breathing room each side. */
+    border: 1px solid transparent;
     border-radius: 5px;
     color: #111111;
     transition: background-color 0.15s ease, border-color 0.15s ease;
