@@ -2284,5 +2284,297 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "OA — Nagrody w koszyku",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "cart_rewards_enabled",
+        "label": "Włącz pasek nagród w koszyku",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_rewards_all_unlocked_text",
+        "label": "Tekst po odblokowaniu wszystkich nagród",
+        "default": "Odblokowane wszystkie nagrody"
+      },
+      {
+        "type": "header",
+        "content": "Próg 1"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_reward_t1_enabled",
+        "label": "Włącz próg 1",
+        "default": true
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t1_threshold",
+        "label": "Próg 1 (zł)",
+        "default": 150
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t1_type",
+        "label": "Typ nagrody",
+        "options": [
+          {
+            "value": "free_shipping",
+            "label": "Darmowa wysyłka"
+          },
+          {
+            "value": "gift",
+            "label": "Upominek"
+          },
+          {
+            "value": "discount",
+            "label": "Rabat"
+          }
+        ],
+        "default": "free_shipping"
+      },
+      {
+        "type": "text",
+        "id": "cart_reward_t1_label",
+        "label": "Etykieta nagrody",
+        "default": "Darmowa wysyłka"
+      },
+      {
+        "type": "product",
+        "id": "cart_reward_t1_gift",
+        "label": "Produkt upominkowy",
+        "info": "Używane tylko dla typu Upominek"
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t1_discount_scope",
+        "label": "Zakres rabatu",
+        "options": [
+          {
+            "value": "order",
+            "label": "Całe zamówienie"
+          },
+          {
+            "value": "product",
+            "label": "Produkt"
+          }
+        ],
+        "default": "order"
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t1_discount_pct",
+        "label": "Wartość rabatu (%)"
+      },
+      {
+        "type": "header",
+        "content": "Próg 2"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_reward_t2_enabled",
+        "label": "Włącz próg 2",
+        "default": true
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t2_threshold",
+        "label": "Próg 2 (zł)",
+        "default": 250
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t2_type",
+        "label": "Typ nagrody",
+        "options": [
+          {
+            "value": "free_shipping",
+            "label": "Darmowa wysyłka"
+          },
+          {
+            "value": "gift",
+            "label": "Upominek"
+          },
+          {
+            "value": "discount",
+            "label": "Rabat"
+          }
+        ],
+        "default": "gift"
+      },
+      {
+        "type": "text",
+        "id": "cart_reward_t2_label",
+        "label": "Etykieta nagrody",
+        "default": "Darmowy upominek"
+      },
+      {
+        "type": "product",
+        "id": "cart_reward_t2_gift",
+        "label": "Produkt upominkowy",
+        "info": "Używane tylko dla typu Upominek"
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t2_discount_scope",
+        "label": "Zakres rabatu",
+        "options": [
+          {
+            "value": "order",
+            "label": "Całe zamówienie"
+          },
+          {
+            "value": "product",
+            "label": "Produkt"
+          }
+        ],
+        "default": "order"
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t2_discount_pct",
+        "label": "Wartość rabatu (%)"
+      },
+      {
+        "type": "header",
+        "content": "Próg 3"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_reward_t3_enabled",
+        "label": "Włącz próg 3",
+        "default": true
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t3_threshold",
+        "label": "Próg 3 (zł)",
+        "default": 400
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t3_type",
+        "label": "Typ nagrody",
+        "options": [
+          {
+            "value": "free_shipping",
+            "label": "Darmowa wysyłka"
+          },
+          {
+            "value": "gift",
+            "label": "Upominek"
+          },
+          {
+            "value": "discount",
+            "label": "Rabat"
+          }
+        ],
+        "default": "discount"
+      },
+      {
+        "type": "text",
+        "id": "cart_reward_t3_label",
+        "label": "Etykieta nagrody",
+        "default": "10% na zamówienie"
+      },
+      {
+        "type": "product",
+        "id": "cart_reward_t3_gift",
+        "label": "Produkt upominkowy",
+        "info": "Używane tylko dla typu Upominek"
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t3_discount_scope",
+        "label": "Zakres rabatu",
+        "options": [
+          {
+            "value": "order",
+            "label": "Całe zamówienie"
+          },
+          {
+            "value": "product",
+            "label": "Produkt"
+          }
+        ],
+        "default": "order"
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t3_discount_pct",
+        "label": "Wartość rabatu (%)",
+        "default": 10
+      },
+      {
+        "type": "header",
+        "content": "Próg 4"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_reward_t4_enabled",
+        "label": "Włącz próg 4",
+        "default": false
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t4_threshold",
+        "label": "Próg 4 (zł)"
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t4_type",
+        "label": "Typ nagrody",
+        "options": [
+          {
+            "value": "free_shipping",
+            "label": "Darmowa wysyłka"
+          },
+          {
+            "value": "gift",
+            "label": "Upominek"
+          },
+          {
+            "value": "discount",
+            "label": "Rabat"
+          }
+        ],
+        "default": "discount"
+      },
+      {
+        "type": "text",
+        "id": "cart_reward_t4_label",
+        "label": "Etykieta nagrody"
+      },
+      {
+        "type": "product",
+        "id": "cart_reward_t4_gift",
+        "label": "Produkt upominkowy",
+        "info": "Używane tylko dla typu Upominek"
+      },
+      {
+        "type": "select",
+        "id": "cart_reward_t4_discount_scope",
+        "label": "Zakres rabatu",
+        "options": [
+          {
+            "value": "order",
+            "label": "Całe zamówienie"
+          },
+          {
+            "value": "product",
+            "label": "Produkt"
+          }
+        ],
+        "default": "order"
+      },
+      {
+        "type": "number",
+        "id": "cart_reward_t4_discount_pct",
+        "label": "Wartość rabatu (%)"
+      }
+    ]
   }
 ]

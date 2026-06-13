@@ -1,0 +1,385 @@
+{%- doc -%}
+  OklejAuto cart rewards bar — progress toward unlockable rewards in the cart
+  drawer (free shipping / gift / discount tiers), plus a segmented progress
+  track that fills as the cart subtotal climbs.
+
+  Reads the global theme settings (config/settings_schema.json group
+  "OA — Nagrody w koszyku") and emits a compact TIERS JSON array consumed by
+  assets/oa-cart-rewards.js. Only ENABLED tiers with a threshold > 0 are
+  emitted, sorted ascending by threshold. Thresholds ride into JS in GROSZE
+  (zł × 100) so they compare 1:1 against cart.items_subtotal_price (cents).
+
+  For a gift tier with a product selected, the gift value is that product's
+  selected_or_first_available_variant.id (the variant the JS adds to the
+  cart); otherwise null.
+
+  Render contract (classes/attrs are the JS + CSS interface):
+    <oa-cart-rewards> with data-money-format / data-currency /
+    data-remaining-template / data-all-unlocked, an application/json data
+    script, an aria-live message <p>, and a track holding the gold progress
+    fill (width set by JS) + one node per tier positioned at --at:pct% where
+    pct = node threshold / max threshold × 100. JS adds .is-reached to nodes
+    whose data-threshold ≤ cart.items_subtotal_price.
+
+  Renders nothing when cart_rewards_enabled is false or no tier qualifies.
+  Logic: assets/oa-cart-rewards.js
+{%- enddoc -%}
+
+{%- comment -%}
+  Single pass over tiers 1..4. Build the JSON items with a clean join (so the
+  array is valid no matter which tiers are disabled — no stray commas), while
+  accumulating the qualifying-tier count and the max threshold used for node
+  positioning. Tiers are emitted in tier-number order, which is the intended
+  ascending-by-threshold order per the schema (t1 < t2 < t3 < t4).
+{%- endcomment -%}
+{%- liquid
+  if settings.cart_rewards_enabled == false
+    break
+  endif
+
+  assign max_threshold = 0
+  assign tier_count = 0
+  assign tier_items = ''
+
+  for n in (1..4)
+    assign enabled_key = 'cart_reward_t' | append: n | append: '_enabled'
+    assign threshold_key = 'cart_reward_t' | append: n | append: '_threshold'
+    assign type_key = 'cart_reward_t' | append: n | append: '_type'
+    assign label_key = 'cart_reward_t' | append: n | append: '_label'
+    assign gift_key = 'cart_reward_t' | append: n | append: '_gift'
+
+    assign tier_enabled = settings[enabled_key]
+    assign tier_threshold_zl = settings[threshold_key] | default: 0
+    assign tier_grosze = tier_threshold_zl | times: 100 | round
+
+    unless tier_enabled and tier_grosze > 0
+      continue
+    endunless
+
+    assign tier_count = tier_count | plus: 1
+    if tier_grosze > max_threshold
+      assign max_threshold = tier_grosze
+    endif
+
+    assign tier_type = settings[type_key] | default: 'free_shipping'
+    assign tier_label = settings[label_key]
+    assign gift_product = settings[gift_key]
+
+    assign gift_id = 'null'
+    if tier_type == 'gift' and gift_product != blank
+      assign gift_variant = gift_product.selected_or_first_available_variant
+      if gift_variant != blank
+        assign gift_id = gift_variant.id | json
+      endif
+    endif
+
+    capture tier_obj
+      echo '{"t":'
+      echo tier_grosze
+      echo ',"type":'
+      echo tier_type | json
+      echo ',"label":'
+      echo tier_label | json
+      echo ',"gift":'
+      echo gift_id
+      echo '}'
+    endcapture
+
+    if tier_items == ''
+      assign tier_items = tier_obj
+    else
+      assign tier_items = tier_items | append: ',' | append: tier_obj
+    endif
+  endfor
+
+  # Server-rendered state (morph-stable). The cart drawer section re-renders on
+  # load/update, which wipes any JS-only paint. Render the fill width, reached
+  # nodes and message HERE from cart.original_total_price (PRE-discount, the
+  # intended basis — items_subtotal_price is post line-level discount) so the
+  # state survives section morphs and works with JS off. The JS only enhances
+  # on cart:update for instant feedback before the section re-render lands.
+  assign oa_value = cart.original_total_price | default: 0
+  assign progress_pct = 0
+  if max_threshold > 0
+    assign progress_pct = oa_value | times: 100.0 | divided_by: max_threshold
+    if progress_pct > 100
+      assign progress_pct = 100
+    endif
+  endif
+  assign oa_next_label = ''
+  assign oa_next_remaining = 0
+  for n in (1..4)
+    assign e_key = 'cart_reward_t' | append: n | append: '_enabled'
+    assign t_key = 'cart_reward_t' | append: n | append: '_threshold'
+    assign l_key = 'cart_reward_t' | append: n | append: '_label'
+    assign te = settings[e_key]
+    assign tg = settings[t_key] | default: 0 | times: 100 | round
+    unless te and tg > 0
+      continue
+    endunless
+    if tg > oa_value and oa_next_label == ''
+      assign oa_next_label = settings[l_key]
+      assign oa_next_remaining = tg | minus: oa_value
+    endif
+  endfor
+-%}
+
+{%- if tier_count > 0 and max_threshold > 0 -%}
+  <oa-cart-rewards
+    class="oa-cart-rewards"
+    data-money-format="{{ shop.money_format | strip_html | escape }}"
+    data-currency="{{ localization.country.currency.iso_code }}"
+    data-remaining-template="Jeszcze [amount] do: [reward]"
+    data-all-unlocked="{{ settings.cart_rewards_all_unlocked_text | escape }}"
+  >
+    <script type="application/json" class="oa-cart-rewards__data">[{{ tier_items }}]</script>
+
+    <p class="oa-cart-rewards__message" aria-live="polite">
+      {%- if oa_next_label == '' -%}
+        {{ settings.cart_rewards_all_unlocked_text | escape }}
+      {%- else -%}
+        Jeszcze {{ oa_next_remaining | money }} do: {{ oa_next_label | escape }}
+      {%- endif -%}
+    </p>
+
+    <div class="oa-cart-rewards__track">
+      <span class="oa-cart-rewards__progress" style="width: {{ progress_pct | round: 2 }}%"></span>
+      {%- for n in (1..4) -%}
+        {%- liquid
+          assign enabled_key = 'cart_reward_t' | append: n | append: '_enabled'
+          assign threshold_key = 'cart_reward_t' | append: n | append: '_threshold'
+          assign label_key = 'cart_reward_t' | append: n | append: '_label'
+          assign type_key = 'cart_reward_t' | append: n | append: '_type'
+
+          assign tier_enabled = settings[enabled_key]
+          assign tier_threshold_zl = settings[threshold_key] | default: 0
+          assign tier_grosze = tier_threshold_zl | times: 100 | round
+          assign tier_label = settings[label_key]
+          assign tier_type = settings[type_key] | default: 'free_shipping'
+
+          # Reward-type icon shown inside the dot until the tier is earned, so a
+          # shopper reads WHAT each checkpoint gives without depending on the
+          # label fitting. On reached, CSS swaps it for the checkmark.
+          assign reward_icon = 'truck'
+          if tier_type == 'gift'
+            assign reward_icon = 'box'
+          elsif tier_type == 'discount'
+            assign reward_icon = 'price_tag'
+          endif
+        -%}
+        {%- if tier_enabled and tier_grosze > 0 -%}
+          {%- assign node_pct = tier_grosze | times: 100.0 | divided_by: max_threshold | round: 2 -%}
+          <span
+            class="oa-cart-rewards__node{% if oa_value >= tier_grosze %} is-reached{% endif %}"
+            data-threshold="{{ tier_grosze }}"
+            style="--at:{{ node_pct }}%"
+          >
+            <span class="oa-cart-rewards__dot">
+              <svg
+                class="oa-cart-rewards__reward-icon"
+                aria-hidden="true"
+                focusable="false"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+              >{%- render 'icon', icon: reward_icon -%}</svg>
+              <span class="oa-cart-rewards__check">{{ 'icon-checkmark.svg' | inline_asset_content }}</span>
+            </span>
+            <span class="oa-cart-rewards__node-label">{{ tier_label | escape }}</span>
+          </span>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    <script src="{{ 'oa-cart-rewards.js' | asset_url }}" type="module" fetchpriority="low"></script>
+  </oa-cart-rewards>
+{%- endif -%}
+
+{% stylesheet %}
+  .oa-cart-rewards {
+    /* Widest a node label may grow, and half of it. The track is inset by the
+       half (INSIDE the drawer gutter) so an edge node's centered label lines up
+       with the gutter and can't spill past it; the node's own max-width uses the
+       full value. Keeping both off one token means the inset and the label cap
+       can never drift out of sync. */
+    --oa-cart-rewards-node-max: 64px;
+    --oa-cart-rewards-node-half: 32px;
+    /* Unreached rail — visible enough to read as one continuous track between
+       the gold fill and the upcoming node (0.05 was invisible → looked gapped). */
+    --oa-cart-rewards-rail: rgba(255, 255, 255, 0.16);
+
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding-block: var(--padding-sm, 12px) var(--padding-md, 16px);
+    /* Match the drawer gutter so the message + track align with the "Cart"
+       heading and the item list below. The cart-drawer-component defines these
+       props; the header + items use the exact same ones. */
+    padding-inline: var(--cart-drawer-padding, 20px);
+    border-bottom: 1px solid var(--oa-border-glass);
+    font-family: var(--font-body--family, 'Golos Text', Inter, sans-serif);
+  }
+
+  @media screen and (min-width: 750px) {
+    .oa-cart-rewards {
+      padding-inline: var(--cart-drawer-padding-desktop, 20px);
+    }
+  }
+
+  .oa-cart-rewards__message {
+    margin: 0 0 14px;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: var(--color-foreground);
+  }
+
+  .oa-cart-rewards__message :where(.oa-cart-rewards__reward) {
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--oa-accent);
+  }
+
+  .oa-cart-rewards__message:empty {
+    display: none;
+  }
+
+  /* Segmented track: a thin rounded rail. Extra block padding leaves room for
+     the dots that sit centered on the rail and the labels that hang below.
+     The horizontal margin is ~half the widest node label (labels cap at 88px,
+     so ~44px overhangs each side of an edge node's centered dot). Insetting the
+     track by that much keeps the 0% and 100% nodes — and their centered labels —
+     fully inside the drawer with no horizontal clipping. The fill and the nodes
+     are positioned against this same (inset) track content box, so dots and the
+     JS-set progress width stay aligned. */
+  .oa-cart-rewards__track {
+    position: relative;
+    height: 4px;
+    margin-block: 18px 44px;
+    margin-inline: var(--oa-cart-rewards-node-half, 36px);
+    background: var(--oa-cart-rewards-rail, rgba(255, 255, 255, 0.16));
+    border-radius: var(--oa-radius-pill);
+  }
+
+  /* Gold fill — width is driven by JS (cart subtotal / max threshold). */
+  .oa-cart-rewards__progress {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    display: block;
+    width: 0;
+    max-width: 100%;
+    border-radius: var(--oa-radius-pill);
+    background: var(--oa-accent);
+    transition: width 0.4s var(--ease-out-quad, ease);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .oa-cart-rewards__progress {
+      transition: none;
+    }
+  }
+
+  /* One node per tier, horizontally centered on its threshold point. The column
+     is anchored at the rail center; the dot is pulled up by half its height so
+     it straddles the rail, and the label flows beneath — so the dot always sits
+     ON the rail regardless of how tall the label wraps. */
+  .oa-cart-rewards__node {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: var(--at, 0%);
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: max-content;
+    max-width: var(--oa-cart-rewards-node-max, 72px);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .oa-cart-rewards__dot {
+    position: relative;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-block-start: -11px;
+    border: 2px solid var(--oa-text-muted);
+    border-radius: 50%;
+    background: var(--oa-surface-card);
+    color: var(--oa-text-muted);
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+      transform 0.25s var(--ease-out-quad, ease);
+  }
+
+  /* The reward-type icon and the earned checkmark share the dot center and
+     cross-fade on reached. */
+  .oa-cart-rewards__reward-icon,
+  .oa-cart-rewards__check {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    transition: opacity 0.2s ease;
+  }
+
+  .oa-cart-rewards__reward-icon {
+    fill: currentcolor;
+    opacity: 1;
+  }
+
+  .oa-cart-rewards__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #111111;
+    opacity: 0;
+  }
+
+  .oa-cart-rewards__check svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+  }
+
+  /* Reached: gold fill, dark check replaces the reward icon, subtle pop. */
+  .oa-cart-rewards__node.is-reached .oa-cart-rewards__dot {
+    border-color: var(--oa-accent);
+    background: var(--oa-accent);
+    color: #111111;
+    transform: scale(1.1);
+  }
+
+  .oa-cart-rewards__node.is-reached .oa-cart-rewards__reward-icon {
+    opacity: 0;
+  }
+
+  .oa-cart-rewards__node.is-reached .oa-cart-rewards__check {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .oa-cart-rewards__dot {
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .oa-cart-rewards__node.is-reached .oa-cart-rewards__dot {
+      transform: none;
+    }
+  }
+
+  .oa-cart-rewards__node-label {
+    margin-block-start: 8px;
+    font-size: 0.625rem;
+    line-height: 1.25;
+    color: var(--oa-text-muted);
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .oa-cart-rewards__node.is-reached .oa-cart-rewards__node-label {
+    color: var(--color-foreground);
+    font-weight: var(--font-weight-semibold, 600);
+  }
+{% endstylesheet %}

@@ -123,9 +123,10 @@
 
           <tbody role="rowgroup">
             {% for item in cart.items %}
+              {%- assign is_gift = item.properties._gift -%}
               <tr
                 role="row"
-                class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}"
+                class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}{% if is_gift %} cart-items__gift-row{% endif %}"
                 ref="cartItemRows[]"
                 data-parent-key="{{ item.parent_relationship.parent.key }}"
                 data-key="{{ item.key }}"
@@ -177,6 +178,9 @@
                       >
                         {{- item.product.title -}}
                       </a>
+                      {%- if is_gift -%}
+                        <span class="cart-items__gift-badge">Upominek</span>
+                      {%- endif -%}
                     </p>
                     {% if item.product.vendor and block_settings.vendor %}
                       <p>
@@ -304,34 +308,38 @@
                     | default: true, allow_false: true
                   %}
                   <div class="cart-items__quantity-controls">
-                    {% render 'volume-pricing-info',
-                      variant: item.variant,
-                      unique_id: item.index,
-                      quantity: item.quantity
-                    %}
+                    {%- if is_gift -%}
+                      <span class="cart-items__gift-note cart-primary-typography">Nagroda dodana automatycznie</span>
+                    {%- else -%}
+                      {% render 'volume-pricing-info',
+                        variant: item.variant,
+                        unique_id: item.index,
+                        quantity: item.quantity
+                      %}
 
-                    {% render 'quantity-selector',
-                      product: item.product,
-                      variant: item.variant,
-                      in_cart_quantity: item.quantity,
-                      line_index: item.index,
-                      class: 'cart-primary-typography',
-                      can_update_quantity: can_update_quantity
-                    %}
+                      {% render 'quantity-selector',
+                        product: item.product,
+                        variant: item.variant,
+                        in_cart_quantity: item.quantity,
+                        line_index: item.index,
+                        class: 'cart-primary-typography',
+                        can_update_quantity: can_update_quantity
+                      %}
 
-                    <button
-                      class="button cart-items__remove"
-                      type="button"
-                      aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                      on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
-                      {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                      {% if can_remove == false %}
-                        hidden
-                      {% endif %}
-                    >
-                      {{- 'icon-delete.svg' | inline_asset_content -}}
-                      <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
-                    </button>
+                      <button
+                        class="button cart-items__remove"
+                        type="button"
+                        aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                        on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                        {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                        {% if can_remove == false %}
+                          hidden
+                        {% endif %}
+                      >
+                        {{- 'icon-delete.svg' | inline_asset_content -}}
+                        <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
+                      </button>
+                    {%- endif -%}
                   </div>
                 </td>
                 <td
@@ -367,11 +375,24 @@
                   role="cell"
                   headers="productTotal"
                 >
-                  <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
-                  {%- if item.unit_price_measurement -%}
-                    <div class="cart-items__price-unit cart-secondary-typography">
-                      {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
-                    </div>
+                  {%- if is_gift -%}
+                    <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                    {%- if item.final_line_price < item.original_line_price -%}
+                      <s class="compare-at-price cart-items__gift-was">
+                        {%- if settings.currency_code_enabled_cart_items -%}
+                          {{ item.original_line_price | money_with_currency }}
+                        {%- else -%}
+                          {{ item.original_line_price | money }}
+                        {%- endif -%}
+                      </s>
+                    {%- endif -%}
+                  {%- else -%}
+                    <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                    {%- if item.unit_price_measurement -%}
+                      <div class="cart-items__price-unit cart-secondary-typography">
+                        {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
+                      </div>
+                    {%- endif -%}
                   {%- endif -%}
                 </td>
               </tr>
@@ -553,6 +574,36 @@
     text-transform: var(--product-title-case);
     display: block;
     margin-block-start: calc((var(--font-size--md) - 1lh) / 2);
+  }
+
+  /* Free-gift line styling */
+  .cart-items__gift-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: var(--margin-3xs);
+    padding: 0.1em 0.6em;
+    border-radius: var(--oa-radius-pill);
+    background: rgb(247 190 24 / 0.12);
+    border: 1px solid rgb(247 190 24 / 0.4);
+    color: var(--oa-accent);
+    font-size: var(--font-size--xs);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .cart-items__gift-note {
+    color: var(--oa-text-muted);
+    font-size: var(--font-size--sm);
+  }
+
+  .cart-items__gift-was {
+    display: inline-block;
+    margin-inline-start: var(--margin-3xs);
+    color: var(--oa-text-muted);
   }
 
   .cart-items__variants {

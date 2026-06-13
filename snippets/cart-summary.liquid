@@ -8,33 +8,22 @@
 <div class="cart-totals">
   {% # We need to keep this node in place to allow morphing to work properly # %}
   <div class="cart-totals__original-container cart-primary-typography">
-    {%- if cart.cart_level_discount_applications.size > 0 -%}
-      <span class="cart-totals__item cart-totals__original">
-        <span class="cart-totals__original-label">{{ 'content.cart_subtotal' | t }}</span>
-        <span
-          class="cart-totals__original-value cart-secondary-typography"
-          data-testid="cart-subtotal-value"
-        >
-          {{- cart.items_subtotal_price | money -}}
+    <span class="cart-totals__item cart-totals__original">
+      <span class="cart-totals__original-label">Wartość produktów</span>
+      <span
+        class="cart-totals__original-value cart-secondary-typography"
+        data-testid="cart-subtotal-value"
+      >
+        {{- cart.original_total_price | money -}}
+      </span>
+    </span>
+    {%- if cart.total_discount > 0 -%}
+      <span class="cart-totals__item cart-totals__savings">
+        <span class="cart-totals__savings-label">Oszczędzasz</span>
+        <span class="cart-totals__savings-value cart-secondary-typography">
+          &minus;{{ cart.total_discount | money }}
         </span>
       </span>
-      <ul
-        class="cart-discounts"
-        role="list"
-        aria-label="{{ 'content.discounts' | t }}"
-      >
-        {%- for discount in cart.cart_level_discount_applications -%}
-          <li class="cart-discounts__item">
-            <span class="cart-discounts__label">
-              {{- 'icon-discount.svg' | inline_asset_content -}}
-              {{ discount.title | escape }}
-            </span>
-            <span class="cart-discounts__value cart-secondary-typography"
-              >-{{ discount.total_allocated_amount | money -}}
-            </span>
-          </li>
-        {%- endfor -%}
-      </ul>
     {%- endif -%}
   </div>
 
@@ -341,6 +330,15 @@
     width: var(--icon-size-sm);
     height: var(--icon-size-sm);
     display: inline-block;
+  }
+
+  .cart-totals__savings {
+    color: var(--oa-accent);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .cart-totals__savings-value {
+    white-space: nowrap;
   }
 
   .cart-totals__original-container,
