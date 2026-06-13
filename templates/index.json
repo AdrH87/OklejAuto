@@ -12,6 +12,7 @@
       "type": "oa-video-hero",
       "name": "Hero wideo",
       "settings": {
+        "video_url": "https://cdn.shopify.com/videos/c/o/v/3fe1471d3f42427cb5521f890e7a0851.mp4",
         "heading": "Niewidzialna ochrona, która pracuje za Ciebie",
         "subheading": "Precyzyjnie docięte folie ochronne na najbardziej narażone elementy Twojego auta",
         "cta_label": "Wybierz element",
