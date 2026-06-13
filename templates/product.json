@@ -107,22 +107,64 @@
             "oa_selling_points": {
               "type": "oa-selling-points",
               "settings": {
-                "icon_1": "recycle",
-                "label_1": "Samoregeneracja",
-                "icon_2": "eye",
-                "label_2": "Niewidoczna",
-                "icon_3": "stopwatch",
-                "label_3": "Montaż DIY",
-                "icon_4": "check_box",
-                "label_4": "Gwarancja trwałości",
-                "icon_5": "ruler",
-                "label_5": "Docinana pod Twoje auto",
+                "icon_1": "eye",
+                "label_1": "Niewidoczna",
+                "icon_2": "stopwatch",
+                "label_2": "Montaż DIY",
+                "icon_3": "check_box",
+                "label_3": "Gwarancja trwałości",
+                "icon_4": "ruler",
+                "label_4": "Docinana pod Twoje auto",
+                "icon_5": "none",
+                "label_5": "",
                 "padding-block-start": 4,
                 "padding-block-end": 4,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "oa_product_description": {
+              "type": "accordion",
+              "name": "Opis produktu",
+              "settings": {
+                "icon": "caret",
+                "dividers": true,
+                "type_preset": "h6",
+                "inherit_color_scheme": true,
+                "color_scheme": "scheme-1",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "desc_row": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Opis produktu",
+                    "open_by_default": false,
+                    "icon": "none",
+                    "width": 20
+                  },
+                  "blocks": {
+                    "desc_text": {
+                      "type": "text",
+                      "settings": {
+                        "text": "{{ closest.product.description }}",
+                        "width": "100%"
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["desc_text"]
+                }
+              },
+              "block_order": ["desc_row"]
             },
             "text_vehicle_heading": {
               "type": "text",
@@ -453,26 +495,6 @@
                 "padding-inline-end": 0
               },
               "blocks": {
-                "faq_row_opis": {
-                  "type": "_accordion-row",
-                  "settings": {
-                    "heading": "Opis produktu",
-                    "open_by_default": false,
-                    "icon": "none",
-                    "width": 20
-                  },
-                  "blocks": {
-                    "faq_answer_opis": {
-                      "type": "text",
-                      "settings": {
-                        "text": "{{ closest.product.description }}",
-                        "width": "100%"
-                      },
-                      "blocks": {}
-                    }
-                  },
-                  "block_order": ["faq_answer_opis"]
-                },
                 "faq_row_1": {
                   "type": "_accordion-row",
                   "settings": {
@@ -554,13 +576,14 @@
                   "block_order": ["faq_answer_4"]
                 }
               },
-              "block_order": ["faq_row_opis", "faq_row_1", "faq_row_2", "faq_row_3", "faq_row_4"]
+              "block_order": ["faq_row_1", "faq_row_2", "faq_row_3", "faq_row_4"]
             }
           },
           "block_order": [
             "text_tefwj7",
             "reviews",
             "oa_selling_points",
+            "oa_product_description",
             "text_vehicle_heading",
             "group_vehicle_row_1",
             "group_vehicle_row_2",

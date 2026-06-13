@@ -46,19 +46,27 @@
   .oa-selling-points {
     width: 100%;
     min-width: 0;
+    container-type: inline-size;
   }
 
-  /* Attribute row (up to 5 items): icon above label. Flex-wrap with equal
-     item widths — 5-up compact on desktop, 2 per row on narrow viewports
-     (2+2+1 with the odd item centered). Never scrolls or crops. */
+  /* Symmetric benefit grid: 2 equal columns (2+2) when narrow, 4 equal columns
+     (one line) once the block is wide enough. Equal-width cells at every step —
+     never a ragged 3+1 wrap. Switches on the block's OWN width (container query),
+     not the viewport, so it stays correct inside the PDP details column. */
   .oa-selling-points__list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--gap-sm) var(--gap-xs);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap-md) var(--gap-sm);
+    align-items: start;
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  @container (min-width: 480px) {
+    .oa-selling-points__list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   .oa-selling-points__item {
@@ -66,7 +74,6 @@
     flex-direction: column;
     align-items: center;
     gap: var(--gap-xs);
-    flex: 0 0 calc((100% - var(--gap-xs)) / 2);
     min-width: 0;
     text-align: center;
   }
@@ -83,12 +90,6 @@
     line-height: 1.3;
     overflow-wrap: break-word;
     min-width: 0;
-  }
-
-  @media screen and (min-width: 480px) {
-    .oa-selling-points__item {
-      flex-basis: calc((100% - 4 * var(--gap-xs)) / 5);
-    }
   }
 {% endstylesheet %}
 
