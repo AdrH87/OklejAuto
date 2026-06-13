@@ -1,0 +1,47 @@
+{%- doc -%}
+  OklejAuto: short product title for the fleet card. Strips the redundant
+  marketing suffix after the em-dash ("— folia ochronna PPF/antypaluch") so the
+  card headline fits in <=2 lines at a readable size on both breakpoints. The
+  full product title is unchanged on the PDP. A real Liquid block (not a text
+  block) so it can chain split | first | strip — the text-block dynamic source
+  only allows one filter. Typography lives in product-card.liquid (.oa-card-title).
+  Safe in onboarding/empty states.
+{%- enddoc -%}
+
+{% liquid
+  assign product = closest.product
+  if product != blank and product.title != blank
+    assign short_title = product.title | split: '—' | first | strip
+  else
+    assign short_title = block.settings.placeholder | default: 'Nazwa produktu'
+  endif
+%}
+
+<div class="oa-card-title" {{ block.shopify_attributes }}>
+  <span class="oa-card-title__text">{{ short_title | escape }}</span>
+</div>
+
+{% schema %}
+{
+  "name": "Tytuł karty (skrócony)",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Pokazuje tytuł produktu bez ogona po myślniku (np. „— folia ochronna PPF”). Pełny tytuł zostaje na stronie produktu."
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Tekst zastępczy (puste stany)",
+      "default": "Nazwa produktu"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tytuł karty (skrócony)",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

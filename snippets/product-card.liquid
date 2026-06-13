@@ -145,11 +145,20 @@
     border-radius: calc(var(--oa-radius-card, 12px) - 4px);
   }
 
-  /* Title: white, larger, medium weight (~22px desktop, ~17px on 2-col mobile) */
-  .product-card .text-block.h5 > * {
-    font-size: clamp(1.0625rem, 0.92rem + 0.62vw, 1.375rem);
-    font-weight: 500;
-    line-height: 1.25;
+  /* Title: full-width SHORT headline (suffix stripped by the _oa-card-title
+     block) above the price. width:100% so it wraps at the card edge; sized to
+     land in <=2 lines at a readable size on both breakpoints — no truncation. */
+  .product-card .oa-card-title {
+    width: 100%;
+  }
+
+  .product-card .oa-card-title__text {
+    display: block;
+    font-size: clamp(0.9375rem, 0.8rem + 0.55vw, 1.25rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
   }
 
   /* Supporting meta lines: muted unless the block sets an explicit color */
@@ -163,15 +172,27 @@
     font-weight: 600;
   }
 
-  /* Density pass: compact spec pills (smaller type + tighter padding than the
-     global .oa-pill primitive — beaten by specificity, not !important) */
+  /* Benefit badges: gold icon + short label. Each pill is an inline unit
+     (label nowrap) so the row wraps into tidy aligned rows, never mid-label.
+     Compact override of the global .oa-pill — won by specificity, no !important. */
   .product-card .product-card-specs {
-    gap: 4px;
+    gap: 4px 6px;
     margin-block-start: 0;
   }
 
   .product-card .product-card-specs .oa-pill {
-    padding: 0.2em 0.7em;
+    gap: 0.3em;
+    padding: 0.25em 0.6em;
     font-size: 0.75rem;
+  }
+
+  .product-card .oa-pill__icon {
+    flex-shrink: 0;
+    fill: currentcolor;
+    color: var(--oa-accent);
+  }
+
+  .product-card .oa-pill__label {
+    white-space: nowrap;
   }
 {% endstylesheet %}

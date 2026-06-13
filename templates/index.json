@@ -320,7 +320,7 @@
                   "name": "t:names.group",
                   "settings": {
                     "open_in_new_tab": false,
-                    "content_direction": "row",
+                    "content_direction": "column",
                     "vertical_on_mobile": true,
                     "horizontal_alignment": "space-between",
                     "vertical_alignment": "center",
@@ -354,11 +354,11 @@
                   },
                   "blocks": {
                     "product_title_gtg38q": {
-                      "type": "product-title",
-                      "name": "t:names.product_title",
+                      "type": "_oa-card-title",
+                      "name": "t:names.text",
                       "settings": {
-                        "width": "fit-content",
-                        "max_width": "normal",
+                        "width": "fill",
+                        "max_width": "none",
                         "alignment": "left",
                         "type_preset": "h5",
                         "font": "var(--font-body--family)",
@@ -387,7 +387,7 @@
                         "show_tax_info": false,
                         "type_preset": "paragraph",
                         "width": "fit-content",
-                        "alignment": "right",
+                        "alignment": "left",
                         "font": "var(--font-body--family)",
                         "font_size": "1rem",
                         "line_height": "normal",

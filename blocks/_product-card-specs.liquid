@@ -13,7 +13,10 @@
 {% if product != blank and product.tags.size > 0 %}
   <div class="product-card-specs" {{ block.shopify_attributes }}>
     {% for tag in product.tags limit: max_pills %}
-      <span class="oa-pill oa-muted">{{ tag | escape }}</span>
+      <span class="oa-pill oa-muted">
+        {%- render 'oa-spec-icon', tag: tag -%}
+        <span class="oa-pill__label">{{ tag | escape }}</span>
+      </span>
     {% endfor %}
   </div>
 {% endif %}

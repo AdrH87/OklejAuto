@@ -1,0 +1,39 @@
+{%- doc -%}
+  OklejAuto: renders the gold benefit icon for a product tag on the fleet card.
+  Maps the tag to an icon from snippets/icon.liquid (same vocabulary as the PDP
+  oa-selling-points block). Renders nothing when the tag has no mapped icon, so
+  the badge gracefully falls back to a label-only pill.
+
+  @param {string} tag - the product tag (benefit), e.g. "Gwarancja 5 lat"
+{%- enddoc -%}
+{%- liquid
+  assign t = tag | strip | downcase
+  assign icon = 'none'
+  case t
+    when 'samoregenerująca', 'samoregeneracja', 'samoregenerujaca'
+      assign icon = 'recycle'
+    when 'montaż diy', 'montaz diy', 'montaż', 'montaz', 'diy'
+      assign icon = 'stopwatch'
+    when 'gwarancja 5 lat', 'gwarancja trwałości', 'gwarancja trwalosci', 'gwarancja'
+      assign icon = 'check_box'
+    when 'niewidoczna', 'niewidzialna'
+      assign icon = 'eye'
+    when 'docinana pod twoje auto', 'docinana', 'na wymiar'
+      assign icon = 'ruler'
+    when 'antypaluch', 'anti-fingerprint'
+      assign icon = 'star'
+  endcase
+-%}
+{%- if icon != 'none' -%}
+  <svg
+    class="oa-pill__icon"
+    aria-hidden="true"
+    focusable="false"
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 20 20"
+  >
+    {%- render 'icon', icon: icon -%}
+  </svg>
+{%- endif -%}
