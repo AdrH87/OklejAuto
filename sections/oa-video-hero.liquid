@@ -174,13 +174,23 @@
 
   .oa-hero__heading {
     margin: 0;
-    max-width: 14ch;
+    /* Wide enough that the headline balances onto TWO lines instead of three
+       (14ch was forcing a 3-line wrap even with room to spare). */
+    max-width: 24ch;
     color: rgb(255 255 255);
-    font-size: clamp(2.25rem, 4.5vw + 1rem, 3.75rem);
+    font-size: clamp(2rem, 5.5vw + 1rem, 5rem);
     font-weight: 500;
-    line-height: 1.05;
+    line-height: 1.1;
     letter-spacing: -0.01em;
     text-wrap: balance;
+  }
+
+  /* Phones: ~32px. The Polish headline wraps to 3 lines at this size (it only
+     fits 2 lines around 24px), accepted in favour of a larger, punchier hero. */
+  @media screen and (max-width: 749px) {
+    .oa-hero__heading {
+      font-size: 2rem;
+    }
   }
 
   .oa-hero__subheading {
